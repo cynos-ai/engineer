@@ -60,8 +60,8 @@
     ]
   },
   "devDependencies": {
-    "@earendil-works/pi-coding-agent": "0.80.2",
-    "@earendil-works/pi-tui": "0.80.2",
+    "@earendil-works/pi-coding-agent": "0.84.2",
+    "@earendil-works/pi-tui": "0.84.2",
     "@types/node": "25.9.3",
     "esbuild": "0.28.1",
     "typebox": "1.2.9",
@@ -69,8 +69,8 @@
     "vitest": "4.1.8"
   },
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": ">=0.80.2",
-    "@earendil-works/pi-tui": ">=0.80.2",
+    "@earendil-works/pi-coding-agent": ">=0.84.2",
+    "@earendil-works/pi-tui": ">=0.84.2",
     "typebox": ">=1.0.59"
   }
 }
