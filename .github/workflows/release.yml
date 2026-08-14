@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install -g npm@11
+      - run: npm ci
+      - run: npm run verify
+      - run: npm run pack:dry-run
+      - name: Build publish tarball
+        run: |
+          TGZ="$(node -p "const p=require('./package.json'); p.name.replace(/^@/, '').replace('/', '-') + '-' + p.version + '.tgz'")"
+          npm pack --pack-destination .
+          test -f "$TGZ"
+          echo "TGZ=$TGZ" >> "$GITHUB_ENV"
+      - name: Publish to npm
+        run: npm publish "$TGZ" --registry=https://registry.npmjs.org/ --access public
+      - name: Generate release notes
+        run: npm run changelog:release-notes > release-notes.md
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release-notes.md

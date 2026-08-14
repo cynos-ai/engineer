@@ -1,0 +1,28 @@
+name: Bug report
+description: Report a reproducible problem
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include credentials, tokens, cookies, private URLs, or personal project data.
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: "@cynos-ai/engineer 0.28.0"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: "Node 22.x, pi x.y.z, OS"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Steps, expected behavior, actual behavior, and redacted logs.
+    validations:
+      required: true

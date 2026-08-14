@@ -1,0 +1,18 @@
+node_modules/
+.cynos/
+smoke-reports/
+.playwright-cli/
+dist/
+/index.js
+*.tgz
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*
+secrets*
+
+# Windows 下载文件元数据（NTFS 备用数据流）
+*:Zone.Identifier
