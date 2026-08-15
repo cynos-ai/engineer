@@ -7,6 +7,12 @@ Cynos 是一个面向 [pi](https://github.com/earendil-works/pi-coding-agent) �
 [![npm 版本](https://img.shields.io/npm/v/@cynos-ai/engineer.svg)](https://www.npmjs.com/package/@cynos-ai/engineer)
 [![GitHub 发布](https://img.shields.io/github/v/release/cynos-ai/engineer.svg)](https://github.com/cynos-ai/engineer/releases)
 
+## 使用要求
+
+- Node.js 22 或更高版本
+- 已安装并可调用的 [pi](https://github.com/earendil-works/pi-coding-agent)
+- Engineer 会捆绑 `@cynos-ai/tools`，提供共享的搜索、视觉和浏览器工具
+
 ---
 
 ## 为什么需要 Cynos
@@ -111,6 +117,18 @@ Cynos 当前包含 12 个实践：
 ```
 
 `/cynos-config` 命令可编辑常用设置：语言、onboard 模式、子代理超时、工作感知的 compaction。搜索 API key、视觉模型、浏览器选项由 `@cynos-ai/tools` 提供——请用 `/cynos-tools-config` 编辑。
+
+## 文档与维护
+
+- [文档索引](./docs/README.md)
+- [架构](./docs/architecture.md)
+- [安装](./docs/installation.md)
+- [开发](./docs/development.md)
+- [测试](./docs/testing.md)
+- [发布](./docs/release.md)
+- [贡献指南](./CONTRIBUTING.md)
+- [安全策略](./SECURITY.md)
+- [变更记录](./CHANGELOG.md)
 
 ## 许可证
 
