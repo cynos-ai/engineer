@@ -1,6 +1,6 @@
 {
   "name": "@cynos-ai/engineer",
-  "version": "0.28.1",
+  "version": "0.28.2",
   "description": "Cynos — an autonomous AI engineering runtime with evidence-based completion verification.",
   "keywords": [
     "pi-package",
@@ -37,7 +37,7 @@
     "release": "node scripts/release.mjs"
   },
   "dependencies": {
-    "@cynos-ai/tools": "0.2.1"
+    "@cynos-ai/tools": "0.2.2"
   },
   "bundledDependencies": [
     "@cynos-ai/tools"

@@ -9,6 +9,12 @@ The name **Cynos** comes from **cynosure** — the North Star: a guiding point f
 [![npm version](https://img.shields.io/npm/v/@cynos-ai/engineer.svg)](https://www.npmjs.com/package/@cynos-ai/engineer)
 [![GitHub release](https://img.shields.io/github/v/release/cynos-ai/engineer.svg)](https://github.com/cynos-ai/engineer/releases)
 
+## Requirements
+
+- Node.js 22 or newer
+- [pi](https://github.com/earendil-works/pi-coding-agent) installed and available as `pi`
+- Engineer bundles `@cynos-ai/tools`, providing the shared search, vision, and browser tools
+
 ---
 
 ## Why Cynos
@@ -113,6 +119,18 @@ User configuration lives in:
 ```
 
 The `/cynos-config` command edits common settings: language, onboard mode, subagent timeout, and work-aware compaction. Search API keys, vision model, and browser options live in `@cynos-ai/tools` — edit them via `/cynos-tools-config`.
+
+## Documentation and maintenance
+
+- [Documentation index](./docs/README.md)
+- [Architecture](./docs/architecture.md)
+- [Installation](./docs/installation.md)
+- [Development](./docs/development.md)
+- [Testing](./docs/testing.md)
+- [Release](./docs/release.md)
+- [Contributing](./CONTRIBUTING.md)
+- [Security policy](./SECURITY.md)
+- [Changelog](./CHANGELOG.md)
 
 ## License
 
