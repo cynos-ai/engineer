@@ -2,6 +2,11 @@
 
 All notable public changes to Cynos Engineer are documented here.
 
+## 0.28.1
+
+- Point npm homepage metadata to the public GitHub README.
+- Align the exact bundled Tools dependency with `@cynos-ai/tools@0.2.1`.
+
 ## 0.28.0
 
 - Publish the source repository under the MIT License.
