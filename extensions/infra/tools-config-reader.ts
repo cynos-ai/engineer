@@ -9,10 +9,11 @@ import { cynosToolsConfigPath, legacyCynosConfigPath } from "./paths";
 //
 // Fallback chain:
 //   1. ~/.pi/agent/cynos-tools.json -> visionModel
-//   2. ~/.pi/agent/cynos-config.json -> visionModel   (legacy, kept for one or two versions)
+//   2. ~/.pi/agent/cynos-config.json -> visionModel   (legacy fallback)
 //
-// This keeps looker working for users who have not re-run /cynos-tools-config since
-// the split, without Engineer reaching into Tools internals.
+// The fallback keeps looker working for users upgrading from a pre-split release
+// who have not yet run /cynos-tools-config, without Engineer reaching into Tools
+// internals. Remove it only in a planned breaking change after a deprecation period.
 
 export async function readToolsVisionModel(): Promise<string | undefined> {
   const tools = await readJsonFileOptional<{ visionModel?: unknown }>(cynosToolsConfigPath());

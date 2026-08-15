@@ -4,7 +4,7 @@
 // Uses --mode json to capture structured event stream (message_end, tool_result_end),
 // rather than --print plain text, to capture metadata like usage, stopReason.
 //
-// Permission boundary (§34): child processes flag themselves via PE_CHILD=1 env var;
+// Permission boundary: child processes flag themselves via PE_CHILD=1 env var;
 // main-agent-only tools (e.g. cynos_subagent itself, vision guard) are not registered in children.
 
 import { spawn } from "node:child_process";

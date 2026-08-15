@@ -115,10 +115,10 @@ Project state lives in the target project:
 User configuration lives in:
 
 ```text
-~/.pi/agent/cynos-config.json
+~/.pi/agent/cynos-engineer.json
 ```
 
-The `/cynos-config` command edits common settings: language, onboard mode, subagent timeout, and work-aware compaction. Search API keys, vision model, and browser options live in `@cynos-ai/tools` — edit them via `/cynos-tools-config`.
+The `/cynos-config` command edits common settings: language, onboard mode, subagent timeout, `PROJECT.md` injection limits, and work-aware compaction. Search API keys, vision model, and browser options live in `@cynos-ai/tools` — edit them via `/cynos-tools-config`.
 
 ## Documentation and maintenance
 

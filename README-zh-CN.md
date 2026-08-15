@@ -113,10 +113,10 @@ Cynos 当前包含 12 个实践：
 用户配置存放在：
 
 ```text
-~/.pi/agent/cynos-config.json
+~/.pi/agent/cynos-engineer.json
 ```
 
-`/cynos-config` 命令可编辑常用设置：语言、onboard 模式、子代理超时、工作感知的 compaction。搜索 API key、视觉模型、浏览器选项由 `@cynos-ai/tools` 提供——请用 `/cynos-tools-config` 编辑。
+`/cynos-config` 命令可编辑常用设置：语言、onboard 模式、子代理超时、`PROJECT.md` 注入限制、工作感知的 compaction。搜索 API key、视觉模型、浏览器选项由 `@cynos-ai/tools` 提供——请用 `/cynos-tools-config` 编辑。
 
 ## 文档与维护
 
