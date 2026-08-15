@@ -2,7 +2,7 @@
 
 **一个让 AI 生成网页从"能用"进阶到"惊艳"的 Agent 技能。**
 
-[English](./README.md) · [返回集合首页](../../README.zh-CN.md)
+[English](./README.md) · [返回 Engineer 根目录](../../README-zh-CN.md)
 
 ![Web Design Skill](https://cdn.jsdelivr.net/gh/ConardLi/assets@main/imgs/web-design-skill.webp)
 
@@ -27,7 +27,11 @@
 - **oklch 色彩理论** —— 基于感知均匀色彩空间的配色派生，取代随机 hex 值
 - **精选字体 × 配色组合** —— 高品质起点，替代默认的 Inter + #3b82f6
 - **占位符哲学** —— 用诚实的 `[icon]` 标记代替拙劣的 SVG 假图
-- **结构化工作流** —— 从需求理解 → 上下文获取 → 设计系统宣告 → v0 草稿 → 完整构建 → 验证的六步流程
+- **五旋钮 Design Read** —— 把受众、产物、品牌和约束转成可见的构图变化 / 动效 / 密度 / 素材 / 品牌保真决策
+- **保留契约的改版协议** —— 动手前区分 Extension、Preserve 与 Overhaul
+- **上下文化失败模式** —— 识别布局、内容、素材、动效与 Dashboard 的常见 AI 问题，同时保留合理例外
+- **结构化工作流** —— 需求 → 上下文 → 校准后的设计系统 → v0 草稿 → 完整构建 → 验证
+- **按需浏览器验收** —— 只有用户明确提出验收或浏览器测试时，才运行响应式 / 交互 / 运行时 QA harness
 
 ---
 
@@ -39,19 +43,22 @@
 
 ```
 your-project/
-├── .agents/skills/web-design-engineer/   # 或 .claude/skills/web-design-engineer/
+├── .agents/skills/ui-design/             # 或 .claude/skills/ui-design/
 │   ├── SKILL.md                          # 主技能文件
 │   └── references/
-│       ├── advanced-patterns.md          # 代码模板库（slide engine / 设备框架 / 动效时间线 / 数据可视化）
-│       ├── design-directions.md          # 设计方向顾问（6 学派，差异化 3 选 1 推荐）
-│       ├── style-recipes/                # 25 套有 anchor 的风格配方（按需读单文件，每个 anchor 一个 .md）
-│       │   ├── INDEX.md                   #   目录索引 + 3 张索引表 + 跨配方反模式
-│       │   ├── linear.md / aesop.md / pentagram.md / ...    #   25 个独立 recipe 文件
-│       └── critique-guide.md             # 5 维评分细则 + 常见问题清单
+│       ├── design-calibration.md         # Design Read 与五个旋钮校准
+│       ├── redesign-protocol.md           # Extension / Preserve / Overhaul 契约
+│       ├── failure-patterns.md            # 上下文化的 AI 设计失败模式
+│       ├── browser-acceptance.md          # 仅在明确要求时使用的浏览器验收 harness
+│       ├── block-library.md               # 可复用 UI Block 索引
+│       ├── advanced-patterns.md           # 代码模板库与可复用 UI 模式
+│       ├── design-directions.md           # 设计方向顾问
+│       ├── style-recipes/                 # 25 套按需加载的 anchor 风格配方
+│       └── critique-guide.md              # 5 维评分细则与问题目录
 └── ...
 ```
 
-也可以从集合首页通过 Claude Code 插件市场一键安装 —— 参见[根目录 README](../../README.zh-CN.md#%E5%AE%89%E8%A3%85)。
+通过 Cynos Engineer 安装后，pi 会在 `ui-design` 实践中自动加载此技能。参见 [Cynos Engineer 快速开始](../../README-zh-CN.md#快速开始)。
 
 当你的请求涉及可视化/交互式前端工作时，Agent 会自动启用此技能。
 
@@ -70,15 +77,16 @@ your-project/
 
 ## 工作原理
 
-### 六步工作流
+### 校准式工作流
 
 ```
 1. 理解需求          →  信息充足就干活，信息不足才提问
-2. 获取设计上下文    →  代码 > 截图；不要从空气中开始
-3. 宣告设计系统      →  配色、字体、间距、动效 —— 用 Markdown 说明，写代码之前
-4. 尽早展示 v0       →  占位符 + 布局 + token；让用户提前纠偏
-5. 完整构建          →  组件、状态、动效；在关键决策点暂停确认
-6. 验证              →  交付前清单；无控制台错误，无私自新增色相
+2. 获取设计上下文    →  代码 > 截图；现有项目先判断改动模式
+3. 产出 Design Read  →  五个旋钮把 brief 映射为可见决策
+4. 宣告设计系统      →  配色、字体、间距、动效 —— 用 Markdown 说明，写代码之前
+5. 尽早展示 v0       →  占位符 + 布局 + token；让用户提前纠偏
+6. 完整构建          →  组件、状态、动效；在关键决策点暂停确认
+7. 验证              →  默认轻量自检；仅在用户明确要求时运行浏览器 harness
 ```
 
 ### 核心设计原则
@@ -119,9 +127,7 @@ your-project/
 
 ## 风格配方画廊
 
-Skill 自带 **25 套有名字的配方**，每套都对应到真实的品牌、工作室或设计师。目录中的每个配方都在 demo 画廊里有一个完整的整页作品 —— 不是共用模板、不是缩略图情绪板，而是每套配方本来就该长成的那种东西：Aesop 是药剂师产品页、Bloomberg Terminal 是交易工作站、Mid-Century 是 Saul Bass 海报、Y2K 是世纪之交的门户网站。按学派浏览下方卡片，挑一套气质契合你 brief 的配方，或者直接读 `references/style-recipes/<recipe>.md` 的 spec 文件。点击任意预览图打开完整分辨率的 2:1 大图。
-
-> 所有截图都是来自 [`demo/web-design-engineer-demo`](../../demo/web-design-engineer-demo/) 这个 React + Vite 画廊的真实渲染 —— 字体、配色、签名手法都和 spec 文件里一致。每个 demo 位于 `src/recipes/<id>.tsx`。
+Skill 自带 **25 套有名字的配方**，每套都对应到真实的品牌、工作室或设计师。用户点名风格时，读取 `references/style-recipes/<id>.md` 中对应的规格文件；本 npm 包不捆绑上游 demo 画廊。
 
 ### Editorial / 极简 · 5 套
 
@@ -392,51 +398,7 @@ Skill 自带 **25 套有名字的配方**，每套都对应到真实的品牌、
 </tr>
 </table>
 
-### 自己跑画廊
 
-```bash
-cd demo/web-design-engineer-demo
-npm install && npm run dev    # http://localhost:5181/
-```
-
-Hash 路由 URL（`#/linear`、`#/aesop`、…）可深链到任意配方。按 `H` 切换配方 HUD，`Esc` 返回画廊。布局细节见 demo 自己的 [README](../../demo/web-design-engineer-demo/README.md)。
-
----
-
-## 启用前后对比：Skill 开 / 关
-
-仓库的 [`demo/web-design-demo/`](../../demo/web-design-demo) 目录包含使用相同提示词、分别在有 Skill 和无 Skill 条件下生成的页面对比。打开 [`demo/web-design-demo/demo2/index.html`](../../demo/web-design-demo/demo2/index.html) 查看对比展示页。
-
-### Demo 1：太空探索博物馆
-
-**提示词：** *"帮我做一个'太空探索博物馆'的线上展览首页——全屏 Hero、4 个核心展览介绍、一个至少 6 个节点的时间线、参观预约 CTA、页脚。整体风格要沉浸感强、有宇宙的深邃感。"*
-
-| | 无 Skill | 有 Skill |
-|---|---|---|
-| **文件** | `demo/web-design-demo/demo2/demo1.html` | `demo/web-design-demo/demo2/demo1-with-skill.html` |
-| **色彩系统** | 硬编码 hex 值（#7cf0ff, #b388ff） | 基于 oklch 的 token 系统，使用 CSS 自定义属性 |
-| **字体** | Orbitron + Noto Serif SC | Instrument Serif + Space Grotesk + JetBrains Mono |
-| **布局** | 标准落地页结构 | 杂志编辑式布局，grid 组合排版 |
-| **细节** | 大量发光效果、霓虹渐变 | 克制的色彩方案、字体层级、装饰性数据元素 |
-| **整体感受** | 热情的初级设计师 | 有经验的设计总监 |
-
-### Demo 2：摄影师作品集
-
-**提示词：** *"帮我做一个独立摄影师的个人作品集网站首页。"*
-
-| | 有 Skill |
-|---|---|
-| **文件** | `demo/web-design-demo/demo2/demo2-with-skill.html` |
-| **角色塑造** | 虚构了北欧摄影师 "Mira Høst"，设计了一整套视觉身份 |
-| **配色** | 暖纸色浅底（#f2efe8）+ 墨色深文（#161513）—— 极度克制的双色调 |
-| **字体** | Instrument Serif（展示标题）+ Space Grotesk（界面）, 大量使用斜体 |
-| **布局** | 杂志编排式结构，编号分节、不对称网格、侧边竖排文字 |
-| **动效** | Hero 图片的慢速 Ken Burns 动画（24秒周期），胶片噪点纹理叠加 |
-| **导航** | `mix-blend-mode: difference` 顶栏 —— 在深浅背景间无缝过渡 |
-
-> 启发本 Skill 的 Claude Design 原始系统提示词保留在上游 [ConardLi/garden-skills](https://github.com/ConardLi/garden-skills) 仓库的 [`dist/prompts/claude-design-system-prompt.md`](https://github.com/ConardLi/garden-skills/blob/main/dist/prompts/claude-design-system-prompt.md)。
-
----
 
 ## 背景
 

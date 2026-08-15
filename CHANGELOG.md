@@ -2,6 +2,13 @@
 
 All notable public changes to Cynos Engineer are documented here.
 
+## 0.28.3
+
+- Refresh the bundled `ui-design` methodology and reference library from upstream v1.3.0 while preserving the Cynos evidence contract.
+- Remove references to demos that are not bundled in the npm package.
+- Correct the Engineer configuration path and clarify `PROJECT.md` limits in both README languages.
+- Use bilingual release-note categories and remove internal planning references from public comments.
+
 ## 0.28.2
 
 - Document Node.js and pi prerequisites.

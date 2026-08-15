@@ -1,6 +1,6 @@
 {
   "name": "@cynos-ai/engineer",
-  "version": "0.28.2",
+  "version": "0.28.3",
   "description": "Cynos — an autonomous AI engineering runtime with evidence-based completion verification.",
   "keywords": [
     "pi-package",

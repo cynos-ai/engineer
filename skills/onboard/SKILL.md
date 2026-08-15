@@ -7,13 +7,13 @@ description: "Use when onboarding an unfamiliar existing project or refreshing i
 
 Goal: build or refresh the project's **maintenance baseline** — accurate, high-signal understanding plus the conventions future agents need to work correctly in this project. Onboard is the agent understanding the project and固化 the result; it is not primarily a human-facing tutorial.
 
-Follow the configured onboard mode from `~/.pi/agent/cynos-config.json` (set via `/cynos-config`):
+Follow the configured onboard mode from `~/.pi/agent/cynos-engineer.json` (set via `/cynos-config`):
 
 - Read config first when possible. Missing/invalid `onboardMode` defaults to `human-assisted`.
 - Start the auditable work with `cynos_start_work(practice="onboard")` before asking scope questions.
 - `human-assisted` (default): ask only for facts code cannot determine, but always use real `cynos_ask_user`/`cynos_resume_work` for scope confirmation before deep reading and for final baseline approval before writing.
 - `auto`: do not wait for user confirmation; make conservative decisions from code/CI/docs evidence and record `automationDecision` plus unresolved questions.
-- Do **not** write `~/.pi/agent/cynos-config.json` during onboard. Mode is a user preference owned by the config layer; users change it via `/cynos-config`, not via the practice.
+- Do **not** write `~/.pi/agent/cynos-engineer.json` during onboard. Mode is a user preference owned by the config layer; users change it via `/cynos-config`, not via the practice.
 
 ## How onboard work is organized: shared preamble + four dimensions
 

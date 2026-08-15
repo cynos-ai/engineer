@@ -5,7 +5,7 @@ import * as path from "node:path";
 // ============================================================
 // Centralized path management
 //
-// Project-level .cynos/ state files + user-level ~/.pi/agent/cynos-config.json config
+// Project-level .cynos/ state files + user-level ~/.pi/agent/cynos-engineer.json config
 // are all exported from here. Other modules always go through these functions.
 // ============================================================
 

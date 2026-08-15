@@ -7,7 +7,7 @@ are retained alongside bundled content where applicable.
 ## `skills/ui-design/`
 
 - Upstream project: [ConardLi/garden-skills](https://github.com/ConardLi/garden-skills)
-- Upstream content: `web-design-engineer` skill, bundled version v1.2.2
+- Upstream content: `web-design-engineer` skill, bundled version v1.3.0
 - License: MIT
 - Local notice: [`skills/ui-design/LICENSE`](./skills/ui-design/LICENSE)
 - Source record: [`skills/ui-design/SOURCE.md`](./skills/ui-design/SOURCE.md)

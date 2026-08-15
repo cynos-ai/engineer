@@ -1,22 +1,15 @@
 #!/usr/bin/env node
 // ============================================================
-// 原子发版脚本
+// Atomic local release helper.
 //
-// 一次调用完成：校验 → 版本 bump → 重生成 CHANGELOG → 单次提交 → 打 tag。
-// 关键不变量：CHANGELOG 与版本号、tag 必须落在同一个 commit 里，
-// tag 指向的提交必须已经包含正确的 CHANGELOG。
+// One invocation verifies the tree, bumps version metadata, regenerates the
+// changelog, creates one release commit, and creates the annotated tag. The tag
+// must point at the commit containing the version and changelog.
 //
-// 这取代了旧的 `npm version` + CI 自动补 changelog 提交的两步流程——
-// 旧流程会让 tag 指向「只有版本号、没有 CHANGELOG」的提交，
-// 且 CI 的自动提交会与本地分叉。
+// Usage:
+//   npm run release -- patch | minor | major | <x.y.z>
 //
-// 用法：
-//   npm run release -- patch     # 0.1.1 → 0.1.2
-//   npm run release -- minor     # 0.1.1 → 0.2.0
-//   npm run release -- major     # 0.1.1 → 1.0.0
-//   npm run release -- 1.2.3     # 显式版本号
-//
-// 完成后手动推送：
+// Push after review with:
 //   git push origin main --follow-tags
 // ============================================================
 import { execFileSync } from "node:child_process";
@@ -28,7 +21,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const kind = process.argv[2];
 
 if (!kind) {
-  console.error("用法: npm run release -- patch | minor | major | <x.y.z>");
+  console.error("Usage: npm run release -- patch | minor | major | <x.y.z>");
   process.exit(1);
 }
 
@@ -53,49 +46,49 @@ function run(args) {
   execFileSync(process.platform === "win32" ? "npm.cmd" : "npm", args, { cwd: root, stdio: "inherit" });
 }
 
-// 1. 工作树必须干净，避免把无关改动混进 release commit。
+// 1. The working tree must be clean so unrelated changes cannot enter the release commit.
 const status = git(["status", "--porcelain"]);
 if (status) {
-  console.error("工作树不干净，请先提交或 stash：\n" + status);
+  console.error("Working tree is not clean. Commit or stash first:\n" + status);
   process.exit(1);
 }
 
-// 2. 发布只从 main 分支发起；先同步远端引用，避免本地基于过期 main 打 tag。
+// 2. Release only from main and refresh remote refs before creating a tag.
 const branch = git(["branch", "--show-current"]);
 if (branch !== "main") {
-  console.error(`当前分支是 ${branch || "detached HEAD"}，请切到 main 后再发版。`);
+  console.error(`Release must start from main; current branch is ${branch || "detached HEAD"}.`);
   process.exit(1);
 }
 console.log("→ git fetch origin main --tags …");
 gitInherit(["fetch", "origin", "main", "--tags"]);
 if (!gitOk(["merge-base", "--is-ancestor", "origin/main", "HEAD"])) {
-  console.error("本地 main 不包含 origin/main 的最新提交。请先 rebase/merge 远端 main，再发版。");
+  console.error("Local main does not contain origin/main. Rebase or merge the remote main before releasing.");
   process.exit(1);
 }
 
-// 3. 读当前版本，计算下一版本。
+// 3. Read the current version and calculate the next version.
 const pkgPath = resolve(root, "package.json");
 const lockPath = resolve(root, "package-lock.json");
 const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
 const current = pkg.version;
 const next = resolveVersion(current, kind);
 if (!next) {
-  console.error(`无法解析目标版本，输入为: ${kind}（当前 ${current}）`);
+  console.error(`Cannot resolve target version: ${kind} (current ${current}).`);
   process.exit(1);
 }
 if (next === current) {
-  console.error(`目标版本与当前相同: ${current}`);
+  console.error(`Target version is unchanged: ${current}.`);
   process.exit(1);
 }
 const tag = `v${next}`;
 if (gitOk(["rev-parse", "--verify", `refs/tags/${tag}`])) {
-  console.error(`tag 已存在: ${tag}`);
+  console.error(`Tag already exists: ${tag}`);
   process.exit(1);
 }
 
-console.log(`准备发版: ${current} → ${next}`);
+console.log(`Preparing release: ${current} → ${next}`);
 
-// 4. 先跑完整校验，失败则中止（不产生任何改动）。
+// 4. Run the full verification before making any file changes.
 console.log("→ npm run verify …");
 run(["run", "verify"]);
 
@@ -104,18 +97,18 @@ pkg.version = next;
 writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf8");
 bumpLockfile(lockPath, next);
 
-// 6. 重生成 CHANGELOG（此时新 tag 尚未创建，脚本以上一个可达 tag 为分界，
-//    生成新版本段）。必须在提交前完成，让 CHANGELOG 进入同一个 commit。
+// 6. Regenerate CHANGELOG before creating the tag so the new section is part
+//    of the same commit.
 console.log("→ npm run changelog …");
 run(["run", "changelog"]);
 
-// 7. 单次提交 + 打 tag。
+// 7. Create one release commit and tag it.
 git(["add", "package.json", "package-lock.json", "CHANGELOG.md"]);
 git(["commit", "-m", `release ${tag}`]);
 git(["tag", "-a", tag, "-m", tag]);
 
-console.log(`\n✓ 已发版 ${tag}（commit 含版本号 + CHANGELOG + tag）`);
-console.log("推送：");
+console.log(`\n✓ Released ${tag} (version, CHANGELOG, and tag share one commit).`);
+console.log("Push:");
 console.log("  git push origin main --follow-tags");
 
 function resolveVersion(currentSemver, input) {
@@ -133,7 +126,7 @@ function resolveVersion(currentSemver, input) {
 function bumpLockfile(path, version) {
   const lock = JSON.parse(readFileSync(path, "utf8"));
   lock.version = version;
-  // lockfile v3：根 packages[""] 也记录版本。
+  // Lockfile v3 also records the version in the root packages[""] entry.
   if (lock.packages && lock.packages[""]) lock.packages[""].version = version;
   writeFileSync(path, JSON.stringify(lock, null, 2) + "\n", "utf8");
 }

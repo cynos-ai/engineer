@@ -21,11 +21,10 @@ import {
 } from "../extensions/subagent/runner";
 
 // ============================================================
-// §42.9 Subagent tests
+// Subagent tests
 //
-// The plan requires 10 test dimensions. This file uses pure unit tests to cover agent discovery,
-// runner utility functions, and permission boundary validation. Child process spawn behavior
-// is not tested here.
+// These pure unit tests cover agent discovery, runner utilities, and permission
+// boundary validation. Child process spawn behavior is not tested here.
 // ============================================================
 
 // ---- Agent Discovery ----

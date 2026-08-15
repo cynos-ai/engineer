@@ -11,7 +11,7 @@ export interface ProjectContext {
 }
 
 // best-effort read of PROJECT.md.
-// Missing file, permission errors, or encoding issues do not block start — only return a warning (§25).
+// Missing file, permission errors, or encoding issues do not block start; return a warning instead.
 // Truncation is per-line (default 600 lines), overridable via config.projectMdMaxLines.
 export async function readProjectMd(cwd: string): Promise<ProjectContext> {
   const filePath = projectMdPath(cwd);

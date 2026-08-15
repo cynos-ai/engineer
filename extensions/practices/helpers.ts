@@ -1010,7 +1010,7 @@ export function mentionsOriginalPromptAuthorization(summary: string): boolean {
 // unknown agent -> exitCode:1 + isError. So a successful subagent call's input.agent is
 // guaranteed to be exactly one of the 5 fixed names. No outputSummary fallback is needed or
 // wanted (scanning it caused false positives, e.g. an explorer mentioning 'review' counted as
-// reviewer). See principles §3.8 criterion C (gate trigger on deterministic field, not text scan).
+// reviewer). Use the deterministic agent field rather than scanning result text.
 export function isSubagentResult(result: CapturedToolResult, expectedAgent: "reviewer" | "challenger"): boolean {
   if (result.toolName !== "cynos_subagent" || result.isError) return false;
   const agent = stringAt(result.input.agent);

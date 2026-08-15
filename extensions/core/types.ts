@@ -133,9 +133,8 @@ export interface Checkpoint {
 //
 // Runs mid-work (injected via the prompt hook, computed from
 // capturedToolResults). It never decides completion and never archives a
-// work. Pilot period: concerns and checkpoints are two parallel sets kept
-// consistent by hand; a later `condition` unification is planned (see
-// docs/v2/cross-project-constraint-architecture-research-2026-07.md §3.3).
+// work. Concerns and checkpoints are deliberately separate: concerns coach
+// the next action, while checkpoints make the final completion decision.
 // ============================================================
 
 export type ConcernStatus = "active" | "drift" | "satisfied";

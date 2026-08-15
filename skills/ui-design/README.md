@@ -2,7 +2,7 @@
 
 **An AI agent skill that transforms AI-generated web pages from "functional" to "stunning."**
 
-[简体中文](./README.zh-CN.md) · [Back to collection root](../../README.md)
+[中文文档](./README.zh-CN.md) · [Back to collection root](../../README.md)
 
 ![Web Design Skill](https://cdn.jsdelivr.net/gh/ConardLi/assets@main/imgs/web-design-skill.webp)
 
@@ -27,7 +27,11 @@ This skill injects **design taste** into the AI's decision-making process throug
 - **oklch color theory** — perceptually uniform color derivation instead of random hex guessing
 - **Curated font & color pairings** — high-quality starting points that replace the default Inter + #3b82f6
 - **Placeholder philosophy** — honest `[icon]` markers instead of poorly drawn SVG fakes
-- **Structured workflow** — six-step process from requirements → context → design system → v0 draft → full build → verification
+- **Five-dial Design Read** — turns audience, artifact, brand, and constraints into visible variance / motion / density / asset / fidelity decisions
+- **Preservation-aware redesigns** — separates extension, preserve, and overhaul modes before touching an existing product
+- **Contextual failure patterns** — detects recurring layout, content, imagery, motion, and dashboard failures without turning taste into universal bans
+- **Structured workflow** — requirements → context → calibrated design system → v0 draft → full build → verification
+- **Opt-in browser acceptance** — executable responsive / interaction / runtime QA only when the user explicitly requests acceptance or browser testing
 
 ---
 
@@ -39,19 +43,22 @@ Copy this skill folder into your project:
 
 ```
 your-project/
-├── .agents/skills/web-design-engineer/   # or .claude/skills/web-design-engineer/
+├── .agents/skills/ui-design/             # or .claude/skills/ui-design/
 │   ├── SKILL.md                          # Main skill file
 │   └── references/
-│       ├── advanced-patterns.md          # Code template library (slide engine, device frames, motion timelines, data viz)
-│       ├── design-directions.md          # Design Direction Advisor (6 schools, differentiated 3-pick recommendation)
-│       ├── style-recipes/                # 25 anchored style recipes — one .md file per anchor, loaded on demand
-│       │   ├── INDEX.md                   #   Catalog index + 3 cross-indexes + cross-cutting anti-patterns
-│       │   ├── linear.md / aesop.md / pentagram.md / ...    #   25 single-recipe files
-│       └── critique-guide.md             # 5-dimension scoring rubric + common issues catalog
+│       ├── design-calibration.md         # Design Read and five-dial calibration
+│       ├── redesign-protocol.md           # Extension / Preserve / Overhaul contracts
+│       ├── failure-patterns.md            # Contextual AI-design failure patterns
+│       ├── browser-acceptance.md          # Explicit-request browser acceptance harness
+│       ├── block-library.md               # Reusable UI block index
+│       ├── advanced-patterns.md           # Code templates and reusable UI patterns
+│       ├── design-directions.md           # Design Direction Advisor
+│       ├── style-recipes/                 # 25 anchored style recipes, loaded on demand
+│       └── critique-guide.md              # 5-dimension scoring rubric and issue catalog
 └── ...
 ```
 
-Or use the Claude Code plugin marketplace from the collection root — see the [top-level README](../../README.md#install).
+When installed through Cynos Engineer, pi automatically loads this skill for the `ui-design` practice. See the [Cynos Engineer quick start](../../README.md#quick-start).
 
 The agent will automatically pick up the skill when your request involves visual/interactive front-end work.
 
@@ -70,15 +77,16 @@ The agent will automatically pick up the skill when your request involves visual
 
 ## How It Works
 
-### The Six-Step Workflow
+### The Calibrated Workflow
 
 ```
 1. Understand requirements  →  Ask only when information is insufficient
-2. Gather design context    →  Code > screenshots; never start from nothing
-3. Declare design system    →  Colors, fonts, spacing, motion — in Markdown, before code
-4. Show v0 draft early      →  Placeholders + layout + tokens; let the user course-correct
-5. Full build               →  Components, states, motion; pause at key decision points
-6. Verify                   →  Pre-delivery checklist; no console errors, no rogue hues
+2. Gather design context    →  Code > screenshots; classify existing-work mode
+3. Produce a Design Read    →  Five dials connect the brief to visible decisions
+4. Declare design system    →  Colors, fonts, spacing, motion — in Markdown, before code
+5. Show v0 draft early      →  Placeholders + layout + tokens; let the user course-correct
+6. Full build               →  Components, states, motion; pause at key decision points
+7. Verify                   →  Lightweight self-check; browser harness only on explicit request
 ```
 
 ### Key Design Principles
@@ -119,9 +127,7 @@ The agent will automatically pick up the skill when your request involves visual
 
 ## Style Recipe Gallery
 
-The skill ships **25 named recipes**, each tied to a real brand, studio, or designer. Every recipe has a working, full-page artefact in the demo gallery — not a shared template, not a thumbnail mood-board, but the form each recipe was actually designed for: an apothecary product page for Aesop, a trading workstation for Bloomberg Terminal, a Saul-Bass poster for Mid-Century, a Y2K portal for Retrofuturism. Browse by school below, pick the one whose vibe matches your brief, or read the spec file at `references/style-recipes/<recipe>.md`. Click any preview to open the full-resolution 2:1 frame.
-
-> Frames are real artefacts rendered by the live React + Vite gallery at [`demo/web-design-engineer-demo`](../../demo/web-design-engineer-demo/) — same fonts, same palettes, same signature moves as the recipe spec. Each demo is in `src/recipes/<id>.tsx`.
+The skill ships **25 named recipes**, each tied to a real brand, studio, or designer. Read the matching specification at `references/style-recipes/<recipe>.md` when an anchor is named; the package does not bundle the upstream demo gallery.
 
 ### Editorial / Minimalist · 5 recipes
 
@@ -391,50 +397,6 @@ The skill ships **25 named recipes**, each tied to a real brand, studio, or desi
 </td>
 </tr>
 </table>
-
-### Run the gallery yourself
-
-```bash
-cd demo/web-design-engineer-demo
-npm install && npm run dev    # http://localhost:5181/
-```
-
-Hash-routed URLs (`#/linear`, `#/aesop`, …) deep-link to any recipe. Press `H` to toggle the recipe HUD, `Esc` to return to the gallery. See the demo's own [README](../../demo/web-design-engineer-demo/README.md) for layout details.
-
----
-
-## Before & after: skill on / off
-
-The repository's [`demo/web-design-demo/`](../../demo/web-design-demo) directory contains side-by-side comparisons of pages generated with and without this skill, using identical prompts. Open [`demo/web-design-demo/demo2/index.html`](../../demo/web-design-demo/demo2/index.html) for a side-by-side viewer.
-
-### Demo 1: Space Exploration Museum
-
-**Prompt:** *"Build a homepage for a fictional 'Space Exploration Museum' — full-screen hero, 4 exhibition sections, a timeline with 6+ milestones, a booking CTA, and a footer. Deep, immersive, cosmic feel."*
-
-| | Without Skill | With Skill |
-|---|---|---|
-| **File** | `demo/web-design-demo/demo2/demo1.html` | `demo/web-design-demo/demo2/demo1-with-skill.html` |
-| **Color system** | Hardcoded hex values (#7cf0ff, #b388ff) | oklch-based token system with CSS custom properties |
-| **Typography** | Orbitron + Noto Serif SC | Instrument Serif + Space Grotesk + JetBrains Mono |
-| **Layout** | Standard landing-page structure | Editorial magazine-style layout with grid compositions |
-| **Details** | Heavy glow effects, neon gradients | Restrained palette, typographic hierarchy, decorative data elements |
-| **Overall feel** | Enthusiastic junior designer | Experienced design director |
-
-### Demo 2: Photographer Portfolio
-
-**Prompt:** *"Build a homepage for an independent photographer's portfolio."*
-
-| | With Skill |
-|---|---|
-| **File** | `demo/web-design-demo/demo2/demo2-with-skill.html` |
-| **Character** | Creates a fictional Nordic photographer "Mira Høst" with a complete visual identity |
-| **Color** | Paper-warm light (#f2efe8) + ink-dark (#161513) — extremely restrained two-tone palette |
-| **Typography** | Instrument Serif (display) + Space Grotesk (UI) with extensive italic usage |
-| **Layout** | Magazine-editorial structure with numbered sections, asymmetric grids, side rails |
-| **Motion** | Slow Ken Burns on hero image (24s cycle), film-grain texture overlay |
-| **Navigation** | `mix-blend-mode: difference` masthead — seamless across light/dark sections |
-
-> The original Claude Design system prompt that inspired this skill is preserved in the upstream [ConardLi/garden-skills](https://github.com/ConardLi/garden-skills) repo at [`dist/prompts/claude-design-system-prompt.md`](https://github.com/ConardLi/garden-skills/blob/main/dist/prompts/claude-design-system-prompt.md).
 
 ---
 

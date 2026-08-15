@@ -38,42 +38,51 @@ function commitsSince(tag) {
 }
 
 function groupFor(subject) {
-  if (/^(feat|feature)(\(.+\))?:/i.test(subject)) return "新增";
-  if (/^(fix|bugfix)(\(.+\))?:/i.test(subject)) return "修复";
-  if (/^docs(\(.+\))?:/i.test(subject)) return "文档";
-  if (/^test(s)?(\(.+\))?:/i.test(subject)) return "测试";
-  if (/^(build|ci|chore|refactor)(\(.+\))?:/i.test(subject)) return "工程";
-  return "其他";
+  if (/^(feat|feature)(\(.+\))?:/i.test(subject)) return "Added";
+  if (/^(fix|bugfix)(\(.+\))?:/i.test(subject)) return "Fixed";
+  if (/^docs(\(.+\))?:/i.test(subject)) return "Documentation";
+  if (/^test(s)?(\(.+\))?:/i.test(subject)) return "Tests";
+  if (/^(build|ci|chore|refactor)(\(.+\))?:/i.test(subject)) return "Engineering";
+  return "Other";
 }
 
 function cleanSubject(subject) {
   return subject.replace(/^[a-z]+(\(.+\))?:\s*/i, "").trim();
 }
 
-// 发版元数据提交不算用户可见变更，不应进入 changelog：
-// - "docs: update changelog [skip ci]"（旧 CI 自动提交）
-// - "release vX.Y.Z"（新原子发版脚本）
-// - 裸版本号 "0.1.1"（旧 `npm version` 风格）
+// Release metadata commits are not user-visible changes and should not enter
+// the changelog:
+// - "docs: update changelog [skip ci]" (legacy CI commit)
+// - "release vX.Y.Z" or "release: package X.Y.Z" (release scripts)
+// - bare versions such as "0.1.1" (legacy `npm version` style)
 function isReleaseMetadata(subject) {
   return /update changelog/i.test(subject)
-    || /^release\s+v?\d/i.test(subject)
+    || /^release(?:\s+|:\s+)(?:[^\s]+\s+)?v?\d/i.test(subject)
     || /^\d+\.\d+\.\d+$/.test(subject);
 }
 
 function renderReleaseNotes(tag, commits) {
   const lines = [`## v${version} - ${today}`, ""];
-  if (tag) lines.push(`范围：${tag}..HEAD`, "");
-  else lines.push("范围：项目首次发布以来的全部提交。", "");
+  if (tag) lines.push(`Range: ${tag}..HEAD / 范围：${tag}..HEAD`, "");
+  else lines.push("Range: all commits since the first public release / 范围：项目首次公开发布以来的全部提交。", "");
 
   if (commits.length === 0) {
-    lines.push("- 无新的提交。");
+    lines.push("- No new commits. / 无新的提交。");
     return `${lines.join("\n")}\n`;
   }
 
-  for (const group of ["新增", "修复", "文档", "测试", "工程", "其他"]) {
-    const items = commits.filter((commit) => groupFor(commit.subject) === group);
+  const groups = [
+    ["Added", "新增"],
+    ["Fixed", "修复"],
+    ["Documentation", "文档"],
+    ["Tests", "测试"],
+    ["Engineering", "工程"],
+    ["Other", "其他"],
+  ];
+  for (const [english, chinese] of groups) {
+    const items = commits.filter((commit) => groupFor(commit.subject) === english);
     if (items.length === 0) continue;
-    lines.push(`### ${group}`, "");
+    lines.push(`### ${english} / ${chinese}`, "");
     for (const item of items) {
       lines.push(`- ${cleanSubject(item.subject)} (${item.hash}, ${item.author})`);
     }
@@ -106,10 +115,10 @@ if (args.has("--release-notes")) {
   const expected = mergeChangelog(entry);
   const current = readFileSync(resolve(root, "CHANGELOG.md"), "utf8");
   if (current !== expected) {
-    console.error("CHANGELOG.md 不是最新。请运行 npm run changelog。");
+    console.error("CHANGELOG.md is out of date. Run npm run changelog.");
     process.exit(1);
   }
 } else {
   writeFileSync(resolve(root, "CHANGELOG.md"), mergeChangelog(entry), "utf8");
-  process.stdout.write("CHANGELOG.md 已更新。\n");
+  process.stdout.write("CHANGELOG.md updated.\n");
 }
