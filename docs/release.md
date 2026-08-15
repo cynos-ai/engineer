@@ -30,9 +30,9 @@ main, runs verification, updates `package.json` and `package-lock.json`,
 regenerates the changelog, creates one release commit, and creates an annotated
 tag.
 
-The GitHub Actions release workflow validates the tag, builds the package, runs
-the package checks, publishes the exact tarball to npm using Trusted Publishing,
-and creates the GitHub Release.
+The GitHub Actions release workflow validates the tag, builds the package, runs the
+package checks, publishes the exact tarball to npm using npm Trusted Publishing
+(OIDC), and creates the GitHub Release.
 
 ## Two-package release order
 
