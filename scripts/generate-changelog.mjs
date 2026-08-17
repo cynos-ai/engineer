@@ -34,7 +34,7 @@ function commitsSince(tag) {
       const [hash, subject, author] = line.split("\x1f");
       return { hash, subject, author };
     })
-    .filter((item) => item.subject && !isReleaseMetadata(item.subject));
+    .filter((item) => item.subject && !isReleaseMetadata(item.subject, changedFiles(item.hash)));
 }
 
 function groupFor(subject) {
@@ -53,12 +53,24 @@ function cleanSubject(subject) {
 // Release metadata commits are not user-visible changes and should not enter
 // the changelog:
 // - "docs: update changelog [skip ci]" (legacy CI commit)
-// - "release vX.Y.Z" or "release: package X.Y.Z" (release scripts)
+// - release-only "release vX.Y.Z" or "release: package X.Y.Z" commits
 // - bare versions such as "0.1.1" (legacy `npm version` style)
-function isReleaseMetadata(subject) {
-  return /update changelog/i.test(subject)
-    || /^release(?:\s+|:\s+)(?:[^\s]+\s+)?v?\d/i.test(subject)
-    || /^\d+\.\d+\.\d+$/.test(subject);
+//
+// A squash-merged release PR can have a release-looking subject while also
+// containing the product changes from the PR. Those commits must remain in the
+// notes, so release subjects are filtered only when the commit changes release
+// metadata files and nothing else.
+const RELEASE_METADATA_FILES = new Set(["CHANGELOG.md", "package.json", "package-lock.json"]);
+
+function changedFiles(hash) {
+  const raw = git(["diff-tree", "--root", "--no-commit-id", "--name-only", "-r", hash], "");
+  return raw ? raw.split("\n").filter(Boolean) : [];
+}
+
+function isReleaseMetadata(subject, files = []) {
+  if (/update changelog/i.test(subject) || /^\d+\.\d+\.\d+$/.test(subject)) return true;
+  if (!/^release(?:\s+|:\s+)(?:[^\s]+\s+)?v?\d+\.\d+\.\d+$/.test(subject)) return false;
+  return files.length > 0 && files.every((file) => RELEASE_METADATA_FILES.has(file));
 }
 
 function renderReleaseNotes(tag, commits) {

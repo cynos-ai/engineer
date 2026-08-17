@@ -459,7 +459,7 @@ describe("practice checkpoints", () => {
     // skip/not-commit authorization (fresh cynos_ask_user + quoted skip intent, or original-prompt
     // opt-out phrase) allows not-committing.
     const baseFinalization = { verificationSummary: "npm test passed", gitSummary: "main clean" };
-    const gitEvidence = [bash("test", "npm test"), ...docs, write("src-write", "src/file.ts"), subagentReview("reviewer-result"), bash("git-status", "git status --short")];
+    const gitEvidence = [...docs, write("src-write", "src/file.ts"), subagentReview("reviewer-result"), bash("test", "npm test"), bash("git-status", "git status --short")];
 
     // (a) bare reason, no authorization -> FAIL (this is the f3/f6 loophole case)
     const bareReason = checkCompletion(work("develop", developWithFiles(["src/file.ts"], { finalization: { ...baseFinalization, commit: { status: "not-committed", reason: "用户未要求提交" } } }), gitEvidence));
@@ -2036,6 +2036,22 @@ function usabilityEvidence(overrides: Record<string, unknown> = {}) {
     const w = work("init", { verification: { summary: "go vet + py_compile passed" } }, captured);
     const result = verificationCommandPassedCheckpoint.check(w);
     expect(result.satisfied, JSON.stringify(result)).toBe(true);
+  });
+
+  it("verification-command-passed requires fresh evidence after the last production write", () => {
+    const stale = work("develop", { verification: { summary: "verified" } }, [
+      bash("early", "npm test"),
+      write("source", "src/file.ts"),
+    ]);
+    const staleResult = verificationCommandPassedCheckpoint.check(stale);
+    expect(staleResult.satisfied).toBe(false);
+    expect((staleResult as any).reason).toContain("before the last production write");
+
+    const fresh = work("develop", { verification: { summary: "verified" } }, [
+      write("source", "src/file.ts"),
+      bash("final", "npm test"),
+    ]);
+    expect(verificationCommandPassedCheckpoint.check(fresh).satisfied).toBe(true);
   });
 
   it("verification-command-passed diagnostic stays concise when nothing matches", () => {

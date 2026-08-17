@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { isGlobalToolsInstalled } from "../extensions/infra/global-tools-detect";
+import { detectGlobalToolsInstallation, isGlobalToolsInstalled } from "../extensions/infra/global-tools-detect";
 
 // isGlobalToolsInstalled reads PI_CODING_AGENT_DIR ?? $CYNOS_HOME/.pi/agent ?? ~/.pi/agent.
 // We isolate via PI_CODING_AGENT_DIR pointing at a temp dir per test.
@@ -39,6 +39,7 @@ describe("isGlobalToolsInstalled", () => {
   it("returns true when settings.json lists npm:@cynos-ai/tools", () => {
     writeSettings(["npm:pi-wechat-assistant", "npm:@cynos-ai/tools"]);
     expect(isGlobalToolsInstalled()).toBe(true);
+    expect(detectGlobalToolsInstallation()).toEqual({ source: "settings" });
   });
 
   it("returns false when settings.json lists only unrelated packages", () => {
@@ -50,6 +51,7 @@ describe("isGlobalToolsInstalled", () => {
     writeSettings(["npm:pi-wechat-assistant"]); // no tools entry
     writeGlobalToolsPackage();
     expect(isGlobalToolsInstalled()).toBe(true);
+    expect(detectGlobalToolsInstallation()).toEqual({ source: "disk", version: "9.9.9" });
   });
 
   it("returns false when neither settings nor disk has the global package", () => {

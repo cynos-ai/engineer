@@ -1,4 +1,4 @@
-import { ensureDir, readJsonFile, readJsonFileOptional, writeJsonAtomic, writeJsonAtomicIfAbsent } from "./fs-utils";
+import { ensureDir, pathExists, readJsonFile, readJsonFileOptional, writeJsonAtomic, writeJsonAtomicIfAbsent } from "./fs-utils";
 import { legacyCynosConfigPath, userConfigPath } from "./paths";
 import * as path from "node:path";
 import type { OnboardMode } from "../core/types";
@@ -64,7 +64,18 @@ export async function mergeUserConfig(patch: Partial<CynosConfig>): Promise<void
 // cannot replace a user's already configured ~/.pi/agent/cynos-engineer.json with defaults.
 // Should be called once in the extension main process's activate() (not in child processes).
 export async function ensureUserConfig(defaults: CynosConfig): Promise<void> {
-  await migrateLegacyEngineerConfig();
+  const migration = await migrateLegacyEngineerConfig();
+  if (migration.blockedByExistingConfig) {
+    try {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[cynos-engineer] Could not migrate legacy settings because ${userConfigPath()} already exists but is not valid JSON. ` +
+          "Back up and repair that file before restarting pi; the legacy file was left untouched.",
+      );
+    } catch {
+      /* logging must never block startup */
+    }
+  }
   await writeJsonAtomicIfAbsent(userConfigPath(), defaults, { mode: 0o600 });
 }
 
@@ -81,10 +92,11 @@ const LEGACY_ENGINEER_FIELDS = [
   "projectMdMaxLines",
 ] as const;
 
-export async function migrateLegacyEngineerConfig(): Promise<{ migrated: boolean; fieldsCopied: string[] }> {
+export async function migrateLegacyEngineerConfig(): Promise<{ migrated: boolean; fieldsCopied: string[]; blockedByExistingConfig?: boolean }> {
   // Best-effort reads: invalid JSON in either file is treated as missing, so a
-  // corrupted target never blocks defaults creation and never overwrites the file.
-  const existing = await readJsonOptionalSafe<CynosConfig>(userConfigPath());
+  // corrupted target never blocks startup and never gets overwritten implicitly.
+  const targetPath = userConfigPath();
+  const existing = await readJsonOptionalSafe<CynosConfig>(targetPath);
   if (existing) return { migrated: false, fieldsCopied: [] };
 
   const legacy = await readJsonOptionalSafe<Record<string, unknown>>(legacyCynosConfigPath());
@@ -102,7 +114,15 @@ export async function migrateLegacyEngineerConfig(): Promise<{ migrated: boolean
   }
   if (copied.length === 0) return { migrated: false, fieldsCopied: [] };
 
-  await writeJsonAtomicIfAbsent(userConfigPath(), migrated, { mode: 0o600 });
+  const written = await writeJsonAtomicIfAbsent(targetPath, migrated, { mode: 0o600 });
+  if (!written) {
+    const targetAfterRace = await readJsonOptionalSafe<CynosConfig>(targetPath);
+    return {
+      migrated: false,
+      fieldsCopied: [],
+      blockedByExistingConfig: !targetAfterRace && await pathExists(targetPath),
+    };
+  }
   return { migrated: true, fieldsCopied: copied };
 }
 

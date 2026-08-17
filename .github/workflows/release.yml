@@ -13,10 +13,10 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -24,6 +24,7 @@ jobs:
       - run: npm ci
       - run: npm run verify
       - run: npm run pack:dry-run
+      - run: npm audit --omit=dev --audit-level=high
       - name: Build publish tarball
         run: |
           TGZ="$(node -p "const p=require('./package.json'); p.name.replace(/^@/, '').replace('/', '-') + '-' + p.version + '.tgz'")"
@@ -35,6 +36,6 @@ jobs:
       - name: Generate release notes
         run: npm run changelog:release-notes > release-notes.md
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          body_path: release-notes.md
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --verify-tag --title "$GITHUB_REF_NAME" --notes-file release-notes.md

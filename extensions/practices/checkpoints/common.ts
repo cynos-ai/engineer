@@ -1,5 +1,5 @@
 import type { Checkpoint, WorkState } from "../../core/types";
-import { findCaptured, findSuspectedUnrecognizedCommands, commandSegments, findSuccessfulSubstantiveCheck, isTestOrVerificationCommand, isWriteLike, findWriteEditForPath, extractToolPath, isRootFile, objectAt, stringAt, cleanVerificationResult } from "../helpers";
+import { capturedIndex, findCaptured, findSuspectedUnrecognizedCommands, commandSegments, findSuccessfulSubstantiveCheck, isTestOrVerificationCommand, isWriteLike, findWriteEditForPath, extractToolPath, isRootFile, lastProductionWriteIndex, objectAt, stringAt, cleanVerificationResult } from "../helpers";
 
 export function satisfied(details?: string, refs?: Array<{ toolCallId?: string; criterionId?: string }>): ReturnType<Checkpoint["check"]> {
   return details || refs ? { satisfied: true, details, refs } : { satisfied: true };
@@ -95,6 +95,7 @@ function parseCriteriaCoverage(value: unknown): Array<{ criterionId: string; sum
 
 function requireSuccessfulVerification(work: WorkState): ReturnType<Checkpoint["check"]> {
   const verification = objectAt(work.completionEvidence?.verification);
+  const lastWriteAt = lastProductionWriteIndex(work);
 
   // no-test bypass: when the project has no automated test suite, declare noTestSuite=true + a reason,
   // and run an ad-hoc command that "really loads/compiles/inspects the changed object"; it does not need to be a recognized test runner.
@@ -102,7 +103,7 @@ function requireSuccessfulVerification(work: WorkState): ReturnType<Checkpoint["
   if (verification?.noTestSuite === true) {
     const reason = stringAt(verification.noTestSuiteReason);
     if (!reason) return notSatisfied(`when verification.noTestSuite=true, verification.noTestSuiteReason must be filled explaining why this project has no automated test suite`);
-    const adHoc = findSuccessfulSubstantiveCheck(work);
+    const adHoc = findSuccessfulSubstantiveCheck(work, lastWriteAt);
     if (adHoc) {
       return satisfied(`no-test bypass: found a real and clean check command: ${String(adHoc.input.command)}`, [{ toolCallId: adHoc.toolCallId }]);
     }
@@ -113,6 +114,7 @@ function requireSuccessfulVerification(work: WorkState): ReturnType<Checkpoint["
   if (requestedId) {
     const exact = findCaptured(work, requestedId);
     if (!exact) return notSatisfied(`completionEvidence.verification.testToolCallId=${requestedId} not found in capturedToolResults; if you do not know the real tool ID, remove this field and the system will auto-infer from successful verification bash — do not page through session logs to find an ID`);
+    if (lastWriteAt >= 0 && capturedIndex(work, exact) <= lastWriteAt) return notSatisfied("referenced verification evidence occurred before the last production write; rerun the final verification after the delivered files are written");
     if (exact.toolName !== "bash") return notSatisfied(`referenced tool_result is not bash: ${requestedId}`);
     if (exact.isError) return notSatisfied(`referenced test command failed: ${requestedId}`);
     const clean = cleanVerificationResult(exact);
@@ -121,12 +123,21 @@ function requireSuccessfulVerification(work: WorkState): ReturnType<Checkpoint["
   }
 
   // Take the "last" successful and clean verification bash (not the first): the engineering-meaningful "final verification" is usually near the wrap-up phase.
+  // If production writes exist, the verification must also be after the last one; an earlier green
+  // result proves the pre-change state, not the delivered state.
   const inferred = [...(work.capturedToolResults ?? [])].reverse().find((result) => {
     const command = String(result.input.command ?? "");
-    return result.toolName === "bash" && !result.isError && isTestOrVerificationCommand(command) && cleanVerificationResult(result).ok;
+    return result.toolName === "bash"
+      && !result.isError
+      && isTestOrVerificationCommand(command)
+      && cleanVerificationResult(result).ok
+      && (lastWriteAt < 0 || capturedIndex(work, result) > lastWriteAt);
   });
   if (inferred) {
     return satisfied(`found a real and clean verification command: ${String(inferred.input.command ?? "")}`, [{ toolCallId: inferred.toolCallId }]);
+  }
+  if (lastWriteAt >= 0) {
+    return notSatisfied("successful verification evidence exists only before the last production write; rerun the final verification after the delivered files are written");
   }
 
   // Dynamic diagnosis: is there a bash that "looks like verification" but was rejected? Give the agent specific clues, not a generic npm hint.

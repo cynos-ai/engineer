@@ -107,6 +107,13 @@ git(["add", "package.json", "package-lock.json", "CHANGELOG.md"]);
 git(["commit", "-m", `release ${tag}`]);
 git(["tag", "-a", tag, "-m", tag]);
 
+const releaseHead = git(["rev-parse", "HEAD"]);
+const taggedCommit = git(["rev-list", "-n", "1", `${tag}^{}`]);
+if (releaseHead !== taggedCommit || pkg.version !== next) {
+  console.error(`Release invariant failed: ${tag} does not point at the ${next} release commit.`);
+  process.exit(1);
+}
+
 console.log(`\n✓ Released ${tag} (version, CHANGELOG, and tag share one commit).`);
 console.log("Push:");
 console.log("  git push origin main --follow-tags");
