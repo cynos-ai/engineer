@@ -60,7 +60,14 @@ function cleanSubject(subject) {
 // containing the product changes from the PR. Those commits must remain in the
 // notes, so release subjects are filtered only when the commit changes release
 // metadata files and nothing else.
-const RELEASE_METADATA_FILES = new Set(["CHANGELOG.md", "package.json", "package-lock.json"]);
+const RELEASE_METADATA_FILES = new Set([
+  "CHANGELOG.md",
+  "package.json",
+  "package-lock.json",
+  "scripts/generate-changelog.mjs",
+  "scripts/release.mjs",
+  "tests/changelog.test.ts",
+]);
 
 function changedFiles(hash) {
   const raw = git(["diff-tree", "--root", "--no-commit-id", "--name-only", "-r", hash], "");
@@ -112,9 +119,23 @@ function mergeChangelog(entry) {
   } catch {
     current = "# Changelog\n\n";
   }
-  const header = `## v${version} - `;
-  const withoutCurrent = current.replace(new RegExp(`\\n?## v${version} - [\\s\\S]*?(?=\\n## v|$)`), "").trimEnd();
-  return `${withoutCurrent}\n\n${entry}`.replace(/\n{3,}/g, "\n\n").trimEnd() + "\n";
+  const lines = current.split(/\r?\n/);
+  const versionHeading = new RegExp(`^##\\s+v?${escapeRegExp(version)}(?:\\s|$)`);
+  const currentStart = lines.findIndex((line) => versionHeading.test(line));
+  if (currentStart >= 0) {
+    const nextSection = lines.findIndex((line, index) => index > currentStart && /^##\s+/.test(line));
+    lines.splice(currentStart, (nextSection >= 0 ? nextSection : lines.length) - currentStart);
+  }
+
+  const entryLines = entry.trim().split(/\r?\n/);
+  const firstSection = lines.findIndex((line) => /^##\s+/.test(line));
+  if (firstSection >= 0) lines.splice(firstSection, 0, ...entryLines, "");
+  else lines.push("", ...entryLines);
+  return lines.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd() + "\n";
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 const previousTag = latestTagBeforeHead();
