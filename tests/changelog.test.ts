@@ -81,6 +81,20 @@ describe("generate-changelog release metadata filtering", () => {
     expect(notes).not.toContain("release v0.28.3");
   });
 
+  it("filters a merge commit that only brings a release commit into main", () => {
+    const repo = createRepo();
+    git(repo, ["checkout", "-b", "release-fixture", "--quiet"]);
+    fs.writeFileSync(path.join(repo, "package.json"), JSON.stringify({ name: "changelog-fixture", version: "0.28.3" }) + "\n");
+    fs.writeFileSync(path.join(repo, "CHANGELOG.md"), "# Changelog\n\n## v0.28.3\n");
+    commit(repo, "release v0.28.3");
+    git(repo, ["checkout", "main", "--quiet"]);
+    git(repo, ["merge", "--no-ff", "release-fixture", "--quiet", "-m", "Merge release v0.28.3"]);
+
+    const notes = releaseNotes(repo);
+    expect(notes).toContain("No new commits");
+    expect(notes).not.toContain("Merge release v0.28.3");
+  });
+
   it("inserts the new section before older entries and replaces a stale same-version section", () => {
     const repo = createRepo("# Changelog\n\n## 0.28.3\n\nold entry\n\n## 0.28.2\n\nolder entry\n");
     fs.writeFileSync(path.join(repo, "package.json"), JSON.stringify({ name: "changelog-fixture", version: "0.28.3" }) + "\n");

@@ -55,6 +55,8 @@ function cleanSubject(subject) {
 // - "docs: update changelog [skip ci]" (legacy CI commit)
 // - release-only "release vX.Y.Z" or "release: package X.Y.Z" commits
 // - bare versions such as "0.1.1" (legacy `npm version` style)
+// - merge commits such as "Merge release v0.28.4", whose release commit is
+//   already reachable from the tag and should not be listed again.
 //
 // A squash-merged release PR can have a release-looking subject while also
 // containing the product changes from the PR. Those commits must remain in the
@@ -76,6 +78,7 @@ function changedFiles(hash) {
 
 function isReleaseMetadata(subject, files = []) {
   if (/update changelog/i.test(subject) || /^\d+\.\d+\.\d+$/.test(subject)) return true;
+  if (/^merge release(?:\s+|:\s+)v?\d+\.\d+\.\d+$/i.test(subject)) return true;
   if (!/^release(?:\s+|:\s+)(?:[^\s]+\s+)?v?\d+\.\d+\.\d+$/.test(subject)) return false;
   return files.length > 0 && files.every((file) => RELEASE_METADATA_FILES.has(file));
 }

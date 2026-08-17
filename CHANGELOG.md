@@ -2,6 +2,18 @@
 
 All notable public changes to Cynos Engineer are documented here.
 
+## v0.28.5 - 2026-08-17
+
+Range: v0.28.4..HEAD / 范围：v0.28.4..HEAD
+
+### Fixed / 修复
+
+- bundle tools 0.2.3 (d1fed2e, JayShen)
+
+### Documentation / 文档
+
+- document protected release ordering (8a9b773, JayShen)
+
 ## v0.28.4 - 2026-08-17
 
 Range: v0.28.3..HEAD / 范围：v0.28.3..HEAD
