@@ -1,0 +1,47 @@
+{
+  "id": "verification-explicit-reference-is-stale",
+  "checkpoint": "verification-command-passed",
+  "work": {
+    "schemaVersion": 1,
+    "id": "fixture-explicit-stale-reference",
+    "cwd": "/tmp/cynos-fixture-project",
+    "practice": "develop",
+    "objective": "fixture",
+    "acceptanceCriteria": [],
+    "status": "active",
+    "startedAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:03:00.000Z",
+    "completionEvidence": {
+      "verification": {
+        "testToolCallId": "test-before-final-write"
+      }
+    },
+    "capturedToolResults": [
+      {
+        "toolCallId": "test-before-final-write",
+        "toolName": "bash",
+        "input": {
+          "command": "npm test"
+        },
+        "outputSummary": "Tests 1 passed",
+        "isError": false,
+        "at": "2026-01-01T00:01:00.000Z"
+      },
+      {
+        "toolCallId": "write-after-test",
+        "toolName": "write",
+        "input": {
+          "path": "/tmp/cynos-fixture-project/src/app.ts",
+          "content": "export const answer = 43;"
+        },
+        "outputSummary": "Wrote src/app.ts",
+        "isError": false,
+        "at": "2026-01-01T00:02:00.000Z"
+      }
+    ]
+  },
+  "expected": {
+    "satisfied": false,
+    "reasonIncludes": "before the last production write"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "criteria-coverage-complete",
+  "checkpoint": "criteria-coverage-complete",
+  "work": {
+    "schemaVersion": 1,
+    "id": "fixture-criteria-covered",
+    "cwd": "/tmp/cynos-fixture-project",
+    "practice": "develop",
+    "objective": "fixture",
+    "acceptanceCriteria": [
+      {
+        "id": "criterion-1",
+        "description": "The change is verified"
+      },
+      {
+        "id": "criterion-2",
+        "description": "The result is documented"
+      }
+    ],
+    "status": "active",
+    "startedAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:02:00.000Z",
+    "completionEvidence": {
+      "criteriaCoverage": [
+        {
+          "criterionId": "criterion-1",
+          "summary": "npm test passed"
+        },
+        {
+          "criterionId": "criterion-2",
+          "summary": "README was updated"
+        }
+      ]
+    },
+    "capturedToolResults": []
+  },
+  "expected": {
+    "satisfied": true,
+    "detailsIncludes": "covered 2 acceptance criteria"
+  }
+}

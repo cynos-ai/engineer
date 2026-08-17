@@ -1,0 +1,38 @@
+{
+  "id": "project-memory-write-complete",
+  "checkpoint": "project-memory-written",
+  "work": {
+    "schemaVersion": 1,
+    "id": "fixture-project-memory-written",
+    "cwd": "/tmp/cynos-fixture-project",
+    "practice": "onboard",
+    "objective": "fixture",
+    "acceptanceCriteria": [],
+    "status": "active",
+    "startedAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:02:00.000Z",
+    "completionEvidence": {
+      "projectMemory": {
+        "path": "PROJECT.md",
+        "writtenToolCallId": "write-project-memory"
+      }
+    },
+    "capturedToolResults": [
+      {
+        "toolCallId": "write-project-memory",
+        "toolName": "write",
+        "input": {
+          "path": "/tmp/cynos-fixture-project/PROJECT.md",
+          "content": "# Project memory\n\n- verification: npm test\n"
+        },
+        "outputSummary": "Wrote PROJECT.md",
+        "isError": false,
+        "at": "2026-01-01T00:02:00.000Z"
+      }
+    ]
+  },
+  "expected": {
+    "satisfied": true,
+    "detailsIncludes": "project root PROJECT.md written"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "id": "project-memory-write-missing",
+  "checkpoint": "project-memory-written",
+  "work": {
+    "schemaVersion": 1,
+    "id": "fixture-project-memory-missing",
+    "cwd": "/tmp/cynos-fixture-project",
+    "practice": "onboard",
+    "objective": "fixture",
+    "acceptanceCriteria": [],
+    "status": "active",
+    "startedAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:02:00.000Z",
+    "completionEvidence": {
+      "projectMemory": {
+        "path": "PROJECT.md"
+      }
+    },
+    "capturedToolResults": [
+      {
+        "toolCallId": "read-project-memory",
+        "toolName": "read",
+        "input": {
+          "path": "/tmp/cynos-fixture-project/PROJECT.md"
+        },
+        "outputSummary": "# Existing project memory",
+        "isError": false,
+        "at": "2026-01-01T00:02:00.000Z"
+      }
+    ]
+  },
+  "expected": {
+    "satisfied": false,
+    "reasonIncludes": "no real write/edit tool result"
+  }
+}
