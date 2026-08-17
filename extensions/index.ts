@@ -1,5 +1,5 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { activateCynosTools, CYNOS_TOOLS_PROTOCOL_VERSION } from "@cynos-ai/tools";
+import { activateCynosTools, CYNOS_TOOLS_PACKAGE_VERSION, CYNOS_TOOLS_PROTOCOL_VERSION } from "@cynos-ai/tools";
 import { registerCommands } from "./core/commands";
 import { registerConfigCommand } from "./core/config-command";
 import { registerSubagentTool } from "./subagent";
@@ -20,11 +20,12 @@ function isChildProcess(): boolean {
   return process.env.PE_CHILD === "1";
 }
 
-function activateSharedTools(pi: ExtensionAPI): void {
+async function activateSharedTools(pi: ExtensionAPI): Promise<void> {
   if (CYNOS_TOOLS_PROTOCOL_VERSION !== SUPPORTED_TOOLS_PROTOCOL) {
     throw new Error(
-      `@cynos-ai/tools protocol mismatch: bundled copy is v${CYNOS_TOOLS_PROTOCOL_VERSION}, ` +
-        `Engineer supports v${SUPPORTED_TOOLS_PROTOCOL}. Align the versions and restart pi.`,
+      `@cynos-ai/tools protocol mismatch: bundled @cynos-ai/tools@${CYNOS_TOOLS_PACKAGE_VERSION} ` +
+        `reports v${CYNOS_TOOLS_PROTOCOL_VERSION}; Engineer supports v${SUPPORTED_TOOLS_PROTOCOL}. ` +
+        "Align the package versions and restart pi.",
     );
   }
   // Coexistence: if the user has @cynos-ai/tools installed as a GLOBAL pi
@@ -56,11 +57,11 @@ function activateSharedTools(pi: ExtensionAPI): void {
   // identical at the published, hoisted-module runtime; only tsc in dev sees two
   // copies. At publish time bundledDependencies + peerDependencies yield one copy.
   const activate = activateCynosTools as unknown as (pi: ExtensionAPI) => Promise<void> | void;
-  const result = activate(pi);
-  if (result instanceof Promise) {
-    void result.catch((error) => {
-      Promise.reject(error);
-    });
+  try {
+    await activate(pi);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to activate bundled @cynos-ai/tools@${CYNOS_TOOLS_PACKAGE_VERSION}: ${detail}`, { cause: error });
   }
 }
 
@@ -98,6 +99,6 @@ export default async function (pi: ExtensionAPI): Promise<void> {
 
   // Activate shared Tools (search/fetch/vision/browser). Runs in both main and
   // child processes; Tools itself decides what to register per CYNOS_AGENT_ROLE.
-  activateSharedTools(pi);
+  await activateSharedTools(pi);
   if (!isChildProcess()) registerMainOnly(pi);
 }

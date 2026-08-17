@@ -13,6 +13,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const indexPath = path.join(root, "index.js");
+const expectToolsFailure = process.argv.includes("--expect-tools-failure");
 
 if (!fs.existsSync(indexPath)) {
   console.error("Built artifact missing: index.js. Run npm run build first.");
@@ -63,8 +64,9 @@ const toolsCalls = [];
 const toolsStub = {
   CYNOS_TOOLS_PROTOCOL_VERSION: 1,
   CYNOS_TOOLS_PACKAGE_VERSION: "0.1.0-stub",
-  activateCynosTools(pi) {
+  async activateCynosTools(pi) {
     toolsCalls.push(pi);
+    if (expectToolsFailure) throw new Error("simulated Tools activation failure");
     // Mimic what real Tools does in child mode: register search/fetch.
     pi.registerTool({ name: "cynos_search" });
     pi.registerTool({ name: "cynos_fetch" });
@@ -95,14 +97,27 @@ try {
     on() { throw new Error("child-process smoke should not register hooks"); },
   };
 
-  await activate(pi);
-
-  if (toolsCalls.length !== 1) throw new Error(`Engineer must call activateCynosTools exactly once in child mode (got ${toolsCalls.length})`);
-  for (const expected of ["cynos_search", "cynos_fetch"]) {
-    if (!registeredTools.includes(expected)) throw new Error(`expected tool not registered: ${expected}`);
+  if (expectToolsFailure) {
+    let failure;
+    try {
+      await activate(pi);
+    } catch (error) {
+      failure = error;
+    }
+    if (!failure) throw new Error("expected Tools activation failure to reject extension activation");
+    const message = failure instanceof Error ? failure.message : String(failure);
+    if (!message.includes("Failed to activate bundled @cynos-ai/tools@0.1.0-stub")) {
+      throw new Error(`activation failure lost its context: ${message}`);
+    }
+    console.log("✓ built index.js smoke OK (Tools activation failures are contextualized)");
+  } else {
+    await activate(pi);
+    if (toolsCalls.length !== 1) throw new Error(`Engineer must call activateCynosTools exactly once in child mode (got ${toolsCalls.length})`);
+    for (const expected of ["cynos_search", "cynos_fetch"]) {
+      if (!registeredTools.includes(expected)) throw new Error(`expected tool not registered: ${expected}`);
+    }
+    console.log(`✓ built index.js smoke OK (activated @cynos-ai/tools once; ${registeredTools.length} child-safe tools registered)`);
   }
-
-  console.log(`✓ built index.js smoke OK (activated @cynos-ai/tools once; ${registeredTools.length} child-safe tools registered)`);
 } finally {
   Module._load = originalLoad;
   if (previousPeChild === undefined) delete process.env.PE_CHILD;
