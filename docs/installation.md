@@ -28,6 +28,20 @@ Pin a version when reproducibility matters:
 pi install npm:@cynos-ai/engineer@x.y.z
 ```
 
+## Optional browser support
+
+Engineer can run ordinary coding, search, and vision workflows without the
+Playwright runtime. When browser evidence or browser tools are needed, install
+the optional peer in the host project:
+
+```bash
+npm install --save-dev playwright-core
+```
+
+The browser runtime does not include a browser binary. Use the Tools browser
+setup command to detect a system Chrome/Chromium/Edge or explicitly confirm a
+Chromium download.
+
 ## Verify
 
 Start pi in a test project:
