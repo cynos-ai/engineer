@@ -38,7 +38,7 @@
     "release": "node scripts/release.mjs"
   },
   "dependencies": {
-    "@cynos-ai/tools": "0.2.2"
+    "@cynos-ai/tools": "0.2.3"
   },
   "bundledDependencies": [
     "@cynos-ai/tools"
