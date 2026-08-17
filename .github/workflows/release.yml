@@ -24,6 +24,7 @@ jobs:
       - run: npm ci
       - run: npm run verify
       - run: npm run pack:dry-run
+      - run: npm audit --omit=dev --audit-level=high
       - name: Build publish tarball
         run: |
           TGZ="$(node -p "const p=require('./package.json'); p.name.replace(/^@/, '').replace('/', '-') + '-' + p.version + '.tgz'")"

@@ -9,6 +9,7 @@ the tag are produced from one release commit.
 npm ci
 npm run verify
 npm run pack:dry-run
+npm run package:smoke
 npm audit --omit=dev
 ```
 
@@ -31,8 +32,8 @@ regenerates the changelog, creates one release commit, and creates an annotated
 tag.
 
 The GitHub Actions release workflow validates the tag, builds the package, runs the
-package checks, publishes the exact tarball to npm using npm Trusted Publishing
-(OIDC), and creates the GitHub Release.
+source and packed-artifact checks, publishes the exact tarball to npm using npm
+Trusted Publishing (OIDC), and creates the GitHub Release.
 
 ## Two-package release order
 

@@ -43,6 +43,10 @@
   "bundledDependencies": [
     "@cynos-ai/tools"
   ],
+  "overrides": {
+    "nanoid": "3.3.18",
+    "postcss": "8.5.23"
+  },
   "files": [
     "README.md",
     "README-zh-CN.md",
