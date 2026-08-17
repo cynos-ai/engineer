@@ -2,8 +2,8 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { ensureUserConfig, getLanguagePreference, getOnboardMode, getSubagentTimeoutMs, languageInstruction, readConfig, SUBAGENT_TIMEOUT_MINUTES, writeUserConfig } from "../extensions/infra/config";
-import { userConfigPath } from "../extensions/infra/paths";
+import { ensureUserConfig, getLanguagePreference, getOnboardMode, getSubagentTimeoutMs, languageInstruction, migrateLegacyEngineerConfig, readConfig, SUBAGENT_TIMEOUT_MINUTES, writeUserConfig } from "../extensions/infra/config";
+import { legacyCynosConfigPath, userConfigPath } from "../extensions/infra/paths";
 
 // getSubagentTimeoutMs is the newly added subagent execution timeout reading logic.
 // It reads subagentTimeoutMinutes from user-level config, falling back to SUBAGENT_TIMEOUT_MINUTES on default/invalid values.
@@ -136,6 +136,46 @@ describe("languageInstruction", () => {
     const instruction = languageInstruction("zh");
     expect(instruction).toContain("Communicate with the user in");
     expect(instruction).toContain("Internal reasoning");
+  });
+});
+
+describe("legacy config migration", () => {
+  let homeTmp = "";
+  let prevHome = "";
+
+  beforeEach(async () => {
+    homeTmp = await fs.mkdtemp(path.join(os.tmpdir(), "pe-home-"));
+    prevHome = process.env.CYNOS_HOME ?? "";
+    process.env.CYNOS_HOME = homeTmp;
+  });
+
+  afterEach(async () => {
+    if (prevHome) process.env.CYNOS_HOME = prevHome;
+    else delete process.env.CYNOS_HOME;
+    await fs.rm(homeTmp, { recursive: true, force: true }).catch(() => {});
+  });
+
+  it("copies only Engineer-owned fields and leaves the legacy file intact", async () => {
+    await fs.mkdir(path.dirname(legacyCynosConfigPath()), { recursive: true });
+    const legacy = { language: "zh", onboardMode: "auto", visionModel: "secret-model", exaApiKey: "do-not-copy" };
+    await fs.writeFile(legacyCynosConfigPath(), JSON.stringify(legacy), "utf8");
+
+    const result = await migrateLegacyEngineerConfig();
+
+    expect(result).toEqual({ migrated: true, fieldsCopied: ["language", "onboardMode"] });
+    expect(JSON.parse(await fs.readFile(userConfigPath(), "utf8"))).toEqual({ schemaVersion: 1, language: "zh", onboardMode: "auto" });
+    expect(JSON.parse(await fs.readFile(legacyCynosConfigPath(), "utf8"))).toEqual(legacy);
+  });
+
+  it("reports an invalid target instead of overwriting it during migration", async () => {
+    await fs.mkdir(path.dirname(userConfigPath()), { recursive: true });
+    await fs.writeFile(userConfigPath(), "{not json", "utf8");
+    await fs.writeFile(legacyCynosConfigPath(), JSON.stringify({ language: "zh" }), "utf8");
+
+    const result = await migrateLegacyEngineerConfig();
+
+    expect(result).toEqual({ migrated: false, fieldsCopied: [], blockedByExistingConfig: true });
+    expect(await fs.readFile(userConfigPath(), "utf8")).toBe("{not json");
   });
 });
 

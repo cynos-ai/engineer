@@ -11,7 +11,9 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const root = process.env.CYNOS_PACKAGE_ROOT
+  ? path.resolve(process.env.CYNOS_PACKAGE_ROOT)
+  : path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const indexPath = path.join(root, "index.js");
 const expectToolsFailure = process.argv.includes("--expect-tools-failure");
 
@@ -106,7 +108,7 @@ try {
     }
     if (!failure) throw new Error("expected Tools activation failure to reject extension activation");
     const message = failure instanceof Error ? failure.message : String(failure);
-    if (!message.includes("Failed to activate bundled @cynos-ai/tools@0.1.0-stub")) {
+    if (!message.includes("Failed to activate bundled @cynos-ai/tools:")) {
       throw new Error(`activation failure lost its context: ${message}`);
     }
     console.log("✓ built index.js smoke OK (Tools activation failures are contextualized)");

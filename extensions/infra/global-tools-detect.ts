@@ -33,12 +33,19 @@ function piAgentDir(): string {
   return path.join(home, ".pi", "agent");
 }
 
+export type GlobalToolsDetectionSource = "settings" | "disk";
+
+export interface GlobalToolsInstallation {
+  source: GlobalToolsDetectionSource;
+  version?: string;
+}
+
 /**
- * Returns true if a user-scope (global) `npm:@cynos-ai/tools` install is
- * detected. Engineer's activateSharedTools uses this to decide whether to
- * defer to the global copy.
+ * Detect a user-scope (global) `npm:@cynos-ai/tools` install. Engineer uses
+ * this result to make its bundled/global ownership decision visible in the
+ * startup warning instead of silently treating every signal as equivalent.
  */
-export function isGlobalToolsInstalled(): boolean {
+export function detectGlobalToolsInstallation(): GlobalToolsInstallation | undefined {
   const agentDir = piAgentDir();
 
   // Signal 1: pi's user-level settings.json lists npm:@cynos-ai/tools.
@@ -47,7 +54,7 @@ export function isGlobalToolsInstalled(): boolean {
     const raw = fs.readFileSync(settingsPath, "utf-8");
     const settings = JSON.parse(raw) as { packages?: unknown };
     const packages = Array.isArray(settings.packages) ? settings.packages : [];
-    if (packages.some((p) => p === "npm:@cynos-ai/tools")) return true;
+    if (packages.some((p) => p === "npm:@cynos-ai/tools")) return { source: "settings" };
   } catch {
     /* settings missing/unreadable — fall through to disk check */
   }
@@ -55,11 +62,24 @@ export function isGlobalToolsInstalled(): boolean {
   // Signal 2: the global package is physically present in pi's npm dir.
   // (Belts-and-suspenders: catches installs where settings.json lags.)
   try {
-    const pkgPath = path.join(agentDir, "npm", "node_modules", "@cynos-ai", "tools", "package.json");
-    if (fs.existsSync(pkgPath)) return true;
+    const packagePath = path.join(agentDir, "npm", "node_modules", "@cynos-ai", "tools", "package.json");
+    if (!fs.existsSync(packagePath)) return undefined;
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf-8")) as { version?: unknown };
+      return {
+        source: "disk",
+        version: typeof packageJson.version === "string" ? packageJson.version : undefined,
+      };
+    } catch {
+      return { source: "disk" };
+    }
   } catch {
     /* ignore */
   }
 
-  return false;
+  return undefined;
+}
+
+export function isGlobalToolsInstalled(): boolean {
+  return detectGlobalToolsInstallation() !== undefined;
 }

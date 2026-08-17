@@ -11,6 +11,17 @@ const output = execFileSync(process.platform === "win32" ? "npm.cmd" : "npm", ["
 
 const pack = parsePackJson(output);
 const files = new Set((pack.files ?? []).map((file) => file.path));
+const MAX_COMPRESSED_BYTES = 5 * 1024 * 1024;
+const MAX_UNPACKED_BYTES = 16 * 1024 * 1024;
+
+if (Number.isFinite(pack.size) && pack.size > MAX_COMPRESSED_BYTES) {
+  console.error(`npm package is too large when compressed: ${formatBytes(pack.size)} > ${formatBytes(MAX_COMPRESSED_BYTES)}`);
+  process.exit(1);
+}
+if (Number.isFinite(pack.unpackedSize) && pack.unpackedSize > MAX_UNPACKED_BYTES) {
+  console.error(`npm package is too large when unpacked: ${formatBytes(pack.unpackedSize)} > ${formatBytes(MAX_UNPACKED_BYTES)}`);
+  process.exit(1);
+}
 
 const required = [
   "index.js",
@@ -62,7 +73,14 @@ if (browserBinary) {
   process.exit(1);
 }
 
-console.log(`✓ npm package dry-run OK (${files.size} files, includes index.js + bundled @cynos-ai/tools)`);
+console.log(`✓ npm package dry-run OK (${files.size} files, ${formatBytes(pack.size)} compressed, ${formatBytes(pack.unpackedSize)} unpacked, includes index.js + bundled @cynos-ai/tools)`);
+
+function formatBytes(value) {
+  if (!Number.isFinite(value)) return "unknown size";
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KiB`;
+  return `${(value / (1024 * 1024)).toFixed(1)} MiB`;
+}
 
 function parsePackJson(text) {
   try {

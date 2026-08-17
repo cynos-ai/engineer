@@ -1,5 +1,5 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { activateCynosTools, CYNOS_TOOLS_PACKAGE_VERSION, CYNOS_TOOLS_PROTOCOL_VERSION } from "@cynos-ai/tools";
+import { activateCynosTools, CYNOS_TOOLS_PROTOCOL_VERSION } from "@cynos-ai/tools";
 import { registerCommands } from "./core/commands";
 import { registerConfigCommand } from "./core/config-command";
 import { registerSubagentTool } from "./subagent";
@@ -9,7 +9,7 @@ import { registerResourcesHook, registerSessionHook, registerPromptHook, registe
 import { registerToolResultCapture } from "./core/tool-result-capture";
 import { validatePractices } from "./practices/registry";
 import { DEFAULT_LANGUAGE, ensureUserConfig } from "./infra/config";
-import { isGlobalToolsInstalled } from "./infra/global-tools-detect";
+import { detectGlobalToolsInstallation } from "./infra/global-tools-detect";
 import type { CynosConfig } from "./infra/config";
 
 // Tools protocol version this Engineer build is compatible with. Bump only when
@@ -23,8 +23,8 @@ function isChildProcess(): boolean {
 async function activateSharedTools(pi: ExtensionAPI): Promise<void> {
   if (CYNOS_TOOLS_PROTOCOL_VERSION !== SUPPORTED_TOOLS_PROTOCOL) {
     throw new Error(
-      `@cynos-ai/tools protocol mismatch: bundled @cynos-ai/tools@${CYNOS_TOOLS_PACKAGE_VERSION} ` +
-        `reports v${CYNOS_TOOLS_PROTOCOL_VERSION}; Engineer supports v${SUPPORTED_TOOLS_PROTOCOL}. ` +
+      `@cynos-ai/tools protocol mismatch: bundled copy reports v${CYNOS_TOOLS_PROTOCOL_VERSION}; ` +
+        `Engineer supports v${SUPPORTED_TOOLS_PROTOCOL}. ` +
         "Align the package versions and restart pi.",
     );
   }
@@ -37,14 +37,16 @@ async function activateSharedTools(pi: ExtensionAPI): Promise<void> {
   // and defers here; the global copy provides the tools. The per-pi-instance
   // WeakMap dedup inside activateCynosTools cannot catch this because pi hands
   // each extension its own ExtensionAPI (loader.js createExtensionAPI).
-  if (isGlobalToolsInstalled()) {
+  const globalTools = detectGlobalToolsInstallation();
+  if (globalTools) {
     // Visible best-effort notice (never block startup). Users who want
     // Engineer's bundled copy instead can `pi remove npm:@cynos-ai/tools`.
     try {
       // eslint-disable-next-line no-console
+      const version = globalTools.version ? `@${globalTools.version}` : "";
       console.warn(
-        "[@cynos-ai/engineer] Global @cynos-ai/tools detected — using it and deferring the bundled copy. " +
-          "To use Engineer's bundled tools instead: `pi remove npm:@cynos-ai/tools`.",
+        `[@cynos-ai/engineer] Global @cynos-ai/tools${version} detected via ${globalTools.source} — ` +
+          "using it and deferring the bundled copy. To use Engineer's bundled tools instead: `pi remove npm:@cynos-ai/tools`.",
       );
     } catch {
       /* ignore */
@@ -61,7 +63,7 @@ async function activateSharedTools(pi: ExtensionAPI): Promise<void> {
     await activate(pi);
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to activate bundled @cynos-ai/tools@${CYNOS_TOOLS_PACKAGE_VERSION}: ${detail}`, { cause: error });
+    throw new Error(`Failed to activate bundled @cynos-ai/tools: ${detail}`, { cause: error });
   }
 }
 
