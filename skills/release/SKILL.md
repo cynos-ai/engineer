@@ -50,9 +50,10 @@ Use `mode='execute'` for real release execution and verify-only readiness checks
 4. **Require explicit confirmation for high-risk operations.** `npm-publish`, `deploy`, `github-release`, and `ci-trigger` require real user confirmation and `authorization.highRiskConfirmed[]`.
 5. **Execute only authorized side effects.** If the user says verify-only, dry-run, no publish, no deploy, or only push/tag, obey exactly. If preflight fails, stop before side effects.
 6. **Avoid opaque release scripts for real release evidence.** Prefer explicit commands the checkpoint can classify (`git tag`, `git push`, `npm publish`, `gh release create`, deploy commands). A black-box command like `npm run release` or `node scripts/release.mjs` must be dry-run, decomposed into recognized commands, or backed by a conservative classifier/test before it can prove a real release operation.
-7. **Post-validate by operation type.** Validate push/tag/publish/GitHub Release/deploy/CI trigger with matching evidence or a blocked/skipped reason.
-8. **Record rollback and final state.** Record rollback/undo, final git status, local-change state, side-effect state, failures/skips, and final release summary.
-9. **Complete with `cynos_check_completion`.**
+7. **Respect protected-main ordering.** In the public repository, never push `main` directly and never push the release tag before its release commit is merged. Create a release branch, open a PR, wait for required `verify`, merge without squash so the tagged commit remains in `main`, then push the tag.
+8. **Post-validate by operation type.** Validate push/tag/publish/GitHub Release/deploy/CI trigger with matching evidence or a blocked/skipped reason.
+9. **Record rollback and final state.** Record rollback/undo, final git status, local-change state, side-effect state, failures/skips, and final release summary.
+10. **Complete with `cynos_check_completion`.**
 
 ## Maintain flow
 

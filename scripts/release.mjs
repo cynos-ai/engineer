@@ -9,8 +9,15 @@
 // Usage:
 //   npm run release -- patch | minor | major | <x.y.z>
 //
-// Push after review with:
+// On an unprotected repository, push after review with:
 //   git push origin main --follow-tags
+//
+// On the public protected repository, create a release branch/PR first, merge
+// without squash so the tagged commit becomes part of main, then push the tag:
+//   git switch -c release/vX.Y.Z
+//   git push -u origin release/vX.Y.Z
+//   # merge the PR without squash after verify passes
+//   git push origin vX.Y.Z
 // ============================================================
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -115,8 +122,13 @@ if (releaseHead !== taggedCommit || pkg.version !== next) {
 }
 
 console.log(`\n✓ Released ${tag} (version, CHANGELOG, and tag share one commit).`);
-console.log("Push:");
+console.log("\nUnprotected main:");
 console.log("  git push origin main --follow-tags");
+console.log("\nProtected main (public repository):");
+console.log(`  git switch -c release/${tag}`);
+console.log(`  git push -u origin release/${tag}`);
+console.log("  # open and merge the PR without squash after verify passes");
+console.log(`  git push origin ${tag}`);
 
 function resolveVersion(currentSemver, input) {
   const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(currentSemver);
