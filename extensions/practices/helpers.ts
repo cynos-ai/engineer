@@ -319,9 +319,10 @@ export function findSuccessfulCleanTestExecution(work: WorkState): CapturedToolR
 // two checkpoints agree on what counts as verification in a project with no automated runner.
 // Keeping this logic in one shared helper prevents the asymmetry that previously deadlocked F6
 // (verification-command-passed accepted python3 -c, but test-assets demanded pytest).
-export function findSuccessfulSubstantiveCheck(work: WorkState): CapturedToolResult | undefined {
+export function findSuccessfulSubstantiveCheck(work: WorkState, afterIndex = -1): CapturedToolResult | undefined {
   return [...(work.capturedToolResults ?? [])].reverse().find((result) => {
     if (result.toolName !== "bash" || result.isError) return false;
+    if (capturedIndex(work, result) <= afterIndex) return false;
     const command = String(result.input.command ?? "");
     return (isVerificationCommand(command) || isAdHocCheckCommand(command)) && cleanVerificationResult(result).ok;
   });

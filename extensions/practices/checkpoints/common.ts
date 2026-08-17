@@ -95,6 +95,7 @@ function parseCriteriaCoverage(value: unknown): Array<{ criterionId: string; sum
 
 function requireSuccessfulVerification(work: WorkState): ReturnType<Checkpoint["check"]> {
   const verification = objectAt(work.completionEvidence?.verification);
+  const lastWriteAt = lastProductionWriteIndex(work);
 
   // no-test bypass: when the project has no automated test suite, declare noTestSuite=true + a reason,
   // and run an ad-hoc command that "really loads/compiles/inspects the changed object"; it does not need to be a recognized test runner.
@@ -102,14 +103,13 @@ function requireSuccessfulVerification(work: WorkState): ReturnType<Checkpoint["
   if (verification?.noTestSuite === true) {
     const reason = stringAt(verification.noTestSuiteReason);
     if (!reason) return notSatisfied(`when verification.noTestSuite=true, verification.noTestSuiteReason must be filled explaining why this project has no automated test suite`);
-    const adHoc = findSuccessfulSubstantiveCheck(work);
+    const adHoc = findSuccessfulSubstantiveCheck(work, lastWriteAt);
     if (adHoc) {
       return satisfied(`no-test bypass: found a real and clean check command: ${String(adHoc.input.command)}`, [{ toolCallId: adHoc.toolCallId }]);
     }
     return notSatisfied(`noTestSuite declared but no successful substantive check command found. Run a command that really loads/compiles/inspects the changed object, e.g. node -e "require('./x')", python -c "import x", pip show x, node --check x.js, python -m py_compile x.py, test -f .env; a bare no-op like node -e 1 does not count.`);
   }
 
-  const lastWriteAt = lastProductionWriteIndex(work);
   const requestedId = stringAt(verification?.testToolCallId).trim();
   if (requestedId) {
     const exact = findCaptured(work, requestedId);
