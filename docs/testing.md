@@ -12,12 +12,15 @@ The command runs:
 
 1. TypeScript typechecking;
 2. the Vitest unit-test suite;
-3. a smoke check of the generated CommonJS entrypoint using host-package stubs.
+3. a smoke check of the generated CommonJS entrypoint using host-package stubs;
+4. an isolated install smoke of the freshly packed npm tarball, including the bundled Tools version.
 
 For package or release changes also run:
 
 ```bash
 npm run pack:dry-run
+npm run package:smoke
+npm audit --omit=dev --audit-level=high
 ```
 
 ## Targeted checks
@@ -27,6 +30,7 @@ npm run typecheck
 npx vitest run tests/practice-checkpoints.test.ts
 npm run build
 npm run build:smoke
+npm run package:smoke
 ```
 
 Use a targeted test while iterating, then run the complete suite before handoff.
