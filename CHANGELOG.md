@@ -2,6 +2,14 @@
 
 All notable public changes to Cynos Engineer are documented here.
 
+## v0.29.0 - 2026-08-17
+
+Range: v0.28.5..HEAD / 范围：v0.28.5..HEAD
+
+### Tests / 测试
+
+- add compatibility matrix and evidence fixtures (8b25bd3, JayShen)
+
 ## v0.28.5 - 2026-08-17
 
 Range: v0.28.4..HEAD / 范围：v0.28.4..HEAD
