@@ -22,17 +22,25 @@ are correct.
 ```bash
 npm run release -- patch
 # or: minor, major, or an explicit x.y.z version
-
-git push origin main --follow-tags
 ```
 
 The release script verifies the tree, checks that the branch contains the remote
 main, runs verification, updates `package.json` and `package-lock.json`,
 regenerates the changelog, creates one release commit, and creates an annotated
-tag.
+tag. It also verifies that the tag points at the release commit.
 
-The GitHub Actions release workflow validates the tag, builds the package, runs the
-source and packed-artifact checks, publishes the exact tarball to npm using npm
+For this protected public repository, do not push `main` or the tag directly after
+running the release script. Preserve the release commit in a release PR:
+
+```bash
+git switch -c release/vX.Y.Z
+git push -u origin release/vX.Y.Z
+# open the PR, wait for verify, and merge without squash
+git push origin vX.Y.Z
+```
+
+The GitHub Actions release workflow then validates the tag, builds the package, runs
+the source and packed-artifact checks, publishes the exact tarball to npm using npm
 Trusted Publishing (OIDC), and creates the GitHub Release.
 
 ## Two-package release order
