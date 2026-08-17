@@ -2,6 +2,14 @@
 
 All notable public changes to Cynos Engineer are documented here.
 
+## v0.28.4 - 2026-08-17
+
+Range: v0.28.3..HEAD / 范围：v0.28.3..HEAD
+
+### Engineering / 工程
+
+- harden runtime and release verification (11fb0d7, JayShen)
+
 ## 0.28.3
 
 - Refresh the bundled `ui-design` methodology and reference library from upstream v1.3.0 while preserving the Cynos evidence contract.
@@ -26,3 +34,11 @@ All notable public changes to Cynos Engineer are documented here.
 - Keep the npm runtime bundle readable and reproducible.
 - Move maintainer-only design history and test assets out of the public repository.
 - Pin development dependencies and document the public build, test, and release workflow.
+
+## v0.28.4 - 2026-08-17
+
+Range: v0.28.3..HEAD / 范围：v0.28.3..HEAD
+
+### Engineering / 工程
+
+- harden runtime and release verification (11fb0d7, JayShen)

@@ -25,7 +25,7 @@ function commit(cwd: string, message: string): void {
   ]);
 }
 
-function createRepo(): string {
+function createRepo(initialChangelog = "# Changelog\n"): string {
   const repo = fs.mkdtempSync(path.join(os.tmpdir(), "cynos-changelog-"));
   tempRepos.push(repo);
   fs.mkdirSync(path.join(repo, "scripts"));
@@ -34,7 +34,7 @@ function createRepo(): string {
   git(repo, ["config", "user.name", "Changelog Test"]);
   git(repo, ["config", "user.email", "changelog-test@example.invalid"]);
   fs.writeFileSync(path.join(repo, "package.json"), JSON.stringify({ name: "changelog-fixture", version: "0.28.2" }) + "\n");
-  fs.writeFileSync(path.join(repo, "CHANGELOG.md"), "# Changelog\n");
+  fs.writeFileSync(path.join(repo, "CHANGELOG.md"), initialChangelog);
   commit(repo, "chore: initial public release");
   git(repo, ["tag", "v0.28.2"]);
   return repo;
@@ -44,6 +44,13 @@ function releaseNotes(repo: string): string {
   return execFileSync(process.execPath, [path.join(repo, "scripts", "generate-changelog.mjs"), "--release-notes"], {
     cwd: repo,
     encoding: "utf8",
+  });
+}
+
+function generateChangelog(repo: string): void {
+  execFileSync(process.execPath, [path.join(repo, "scripts", "generate-changelog.mjs")], {
+    cwd: repo,
+    stdio: "ignore",
   });
 }
 
@@ -72,5 +79,19 @@ describe("generate-changelog release metadata filtering", () => {
     const notes = releaseNotes(repo);
     expect(notes).toContain("No new commits");
     expect(notes).not.toContain("release v0.28.3");
+  });
+
+  it("inserts the new section before older entries and replaces a stale same-version section", () => {
+    const repo = createRepo("# Changelog\n\n## 0.28.3\n\nold entry\n\n## 0.28.2\n\nolder entry\n");
+    fs.writeFileSync(path.join(repo, "package.json"), JSON.stringify({ name: "changelog-fixture", version: "0.28.3" }) + "\n");
+    fs.writeFileSync(path.join(repo, "README.md"), "new public change\n");
+    commit(repo, "feat: add public changelog fixture");
+
+    generateChangelog(repo);
+    const changelog = fs.readFileSync(path.join(repo, "CHANGELOG.md"), "utf8");
+    expect(changelog.indexOf("## v0.28.3")).toBeGreaterThanOrEqual(0);
+    expect(changelog.indexOf("## v0.28.3")).toBeLessThan(changelog.indexOf("## 0.28.2"));
+    expect(changelog).not.toContain("old entry");
+    expect((changelog.match(/## v0\.28\.3/g) ?? []).length).toBe(1);
   });
 });
