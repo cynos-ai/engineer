@@ -42,14 +42,23 @@ jobs:
         env:
           PI_VERSION: ${{ matrix.pi_version }}
         run: |
-          npm install --ignore-scripts --no-save --package-lock=false --no-audit --no-fund \
-            "@earendil-works/pi-coding-agent@${PI_VERSION}" \
-            "@earendil-works/pi-tui@${PI_VERSION}"
+          CURRENT_PI_VERSION="$(node -p 'require("./package.json").devDependencies["@earendil-works/pi-coding-agent"]')"
+          if [ "$PI_VERSION" = "$CURRENT_PI_VERSION" ]; then
+            echo "Using the lockfile Pi baseline: $PI_VERSION"
+          else
+            npm install --ignore-scripts --no-save --package-lock=false --legacy-peer-deps --no-audit --no-fund \
+              "@earendil-works/pi-coding-agent@${PI_VERSION}" \
+              "@earendil-works/pi-tui@${PI_VERSION}"
+          fi
       - name: Report installed host versions
         run: |
           node - <<'NODE'
+          const fs = require("node:fs");
+          const path = require("node:path");
           for (const name of ["@earendil-works/pi-coding-agent", "@earendil-works/pi-tui"]) {
-            console.log(`${name}: ${require(`${name}/package.json`).version}`);
+            const packagePath = path.join(process.cwd(), "node_modules", name, "package.json");
+            const pkg = JSON.parse(fs.readFileSync(packagePath, "utf8"));
+            console.log(`${name}: ${pkg.version}`);
           }
           NODE
       - run: npm run verify
