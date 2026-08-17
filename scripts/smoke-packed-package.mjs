@@ -3,7 +3,7 @@
 // published-artifact smoke against it. This catches files[] and bundledDependency
 // mistakes that a source-tree build smoke cannot see.
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -45,12 +45,17 @@ try {
   if (toolsPackageJson.version !== declaredTools) {
     throw new Error(`bundled Tools version mismatch: declared ${declaredTools}, installed ${toolsPackageJson.version}`);
   }
+  const optionalBrowserPeer = toolsPackageJson.peerDependenciesMeta?.["playwright-core"]?.optional === true;
+  const nestedPlaywright = path.join(packageRoot, "node_modules", "@cynos-ai", "tools", "node_modules", "playwright-core");
+  if (optionalBrowserPeer && existsSync(nestedPlaywright)) {
+    throw new Error("optional playwright-core was bundled inside Engineer; ordinary installs must not carry the browser runtime");
+  }
 
   const smoke = path.join(root, "scripts", "smoke-built-index.mjs");
   const env = { ...process.env, CYNOS_PACKAGE_ROOT: packageRoot };
   run(process.execPath, [smoke], { env });
   run(process.execPath, [smoke, "--expect-tools-failure"], { env });
-  console.log(`✓ packed npm artifact smoke OK (${packageJson.name}@${packageJson.version}, bundled Tools ${toolsPackageJson.version})`);
+  console.log(`✓ packed npm artifact smoke OK (${packageJson.name}@${packageJson.version}, bundled Tools ${toolsPackageJson.version}${optionalBrowserPeer ? "; optional playwright peer not bundled" : ""})`);
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }

@@ -38,7 +38,7 @@
     "release": "node scripts/release.mjs"
   },
   "dependencies": {
-    "@cynos-ai/tools": "0.2.3"
+    "@cynos-ai/tools": "0.3.0"
   },
   "bundledDependencies": [
     "@cynos-ai/tools"
@@ -76,6 +76,12 @@
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": ">=0.84.2",
     "@earendil-works/pi-tui": ">=0.84.2",
-    "typebox": ">=1.0.59"
+    "typebox": ">=1.0.59",
+    "playwright-core": ">=1.61.1"
+  },
+  "peerDependenciesMeta": {
+    "playwright-core": {
+      "optional": true
+    }
   }
 }

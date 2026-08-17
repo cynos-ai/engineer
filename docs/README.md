@@ -6,6 +6,7 @@ Public documentation for Cynos Engineer:
 - [Installation](./installation.md) — install Cynos into pi.
 - [Development](./development.md) — local setup and contribution workflow.
 - [Testing](./testing.md) — verification commands and diagnostics.
+- [Compatibility](./compatibility.md) — supported Node.js and Pi host baselines.
 - [Release](./release.md) — versioning, package publishing, and rollback.
 - [Repository maintenance rules](./rules/repository-maintenance.md) — contributor-facing repository rules.
 

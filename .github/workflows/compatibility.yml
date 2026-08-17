@@ -1,0 +1,57 @@
+name: Compatibility
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  pi-compatibility:
+    name: ${{ matrix.channel }} / Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - channel: minimum
+            pi_version: "0.84.2"
+            node: 22
+          - channel: minimum
+            pi_version: "0.84.2"
+            node: 24
+          - channel: current
+            pi_version: "0.84.2"
+            node: 22
+          - channel: current
+            pi_version: "0.84.2"
+            node: 24
+          - channel: latest
+            pi_version: latest
+            node: 24
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - name: Install the matrix Pi host
+        env:
+          PI_VERSION: ${{ matrix.pi_version }}
+        run: |
+          npm install --ignore-scripts --no-save --package-lock=false --no-audit --no-fund \
+            "@earendil-works/pi-coding-agent@${PI_VERSION}" \
+            "@earendil-works/pi-tui@${PI_VERSION}"
+      - name: Report installed host versions
+        run: |
+          node - <<'NODE'
+          for (const name of ["@earendil-works/pi-coding-agent", "@earendil-works/pi-tui"]) {
+            console.log(`${name}: ${require(`${name}/package.json`).version}`);
+          }
+          NODE
+      - run: npm run verify
+      - run: npm run pack:dry-run
+      - run: npm audit --omit=dev --audit-level=high

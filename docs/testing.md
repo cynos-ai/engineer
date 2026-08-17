@@ -43,6 +43,23 @@ boundaries, and the public capability integration boundaries. The build smoke
 checks the default export, host-package externalization, and child-safe tool
 registration without requiring a live pi process or browser.
 
+### Evidence golden fixtures
+
+`tests/fixtures/evidence/*.json` are deterministic replay cases for individual
+completion checkpoints. Each fixture records a small `WorkState`, captured tool
+results, and the expected verdict. They include both valid evidence and cases
+that must remain rejected, such as verification that happened before the last
+production write or a PROJECT.md read without a real write. Run them with the
+normal Vitest suite or directly:
+
+```bash
+npx vitest run tests/evidence-fixtures.test.ts
+```
+
+The fixtures intentionally assert stable verdicts and short reason/detail
+fragments rather than timestamps or full prose, so diagnostic wording can evolve
+without weakening the evidence contract.
+
 ## Package validation
 
 `npm run pack:dry-run` verifies that the package contains its runtime entrypoint,
