@@ -71,7 +71,7 @@
     "esbuild": "0.28.1",
     "typebox": "1.2.9",
     "typescript": "5.9.3",
-    "vitest": "4.1.8"
+    "vitest": "4.1.10"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": ">=0.84.2",
